@@ -2,3 +2,15 @@ streamlit
 streamlit_chat
 langchain
 sentence_transformers
+PyMuPDF==1.22.3
+pdfplumber==0.8.0
+pdf2image==1.16.2
+zipp==3.12.0
+langchain
+openai
+chromadb
+pypdf
+tiktoken
+panel
+notebook
+faiss-cpu
