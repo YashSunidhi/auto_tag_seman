@@ -117,9 +117,9 @@ if uploaded_file is not None:
         val = f"image_{page_option+1}.png"
         page = doc.load_page(page_option)
         pix = page.get_pixmap(matrix=mat)
-        pix.save("/Users/mishrs39/Downloads/"+str(val))
+        pix.save("https://github.com/YashSunidhi/auto_tag_seman/blob/main/"+str(val))
 
-        imager = Image.open("/Users/mishrs39/Downloads/"+str(val))
+        imager = Image.open("https://github.com/YashSunidhi/auto_tag_seman/blob/main/"+str(val))
         col1.image(imager, caption=val)
         col1.markdown('### Raw Text from Page')
         page = doc[page_option]
@@ -181,7 +181,7 @@ if uploaded_file is not None:
         page_option = st.sidebar.selectbox(
         'Page Selection',
         (range(0,len(doc))))
-        dg = pd.read_csv('/Users/mishrs39/Downloads/test_breast_file_csv_updated_3.csv')
+        dg = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/test_breast_file_csv_updated_3.csv')
         tot12 = dg[dg['page'] ==page_option][['page','blocks','text', 'med_ner','epid_ner']].replace('Reference:','').replace('References:','').drop_duplicates().groupby(['page','blocks']).agg({'text':''.join, 'med_ner':''.join, 'epid_ner':''.join}).drop_duplicates().reset_index(drop=True)
         col1.dataframe(tot12[:-3])
 
@@ -262,7 +262,7 @@ if uploaded_file is not None:
         # 'Page Selection',
         # (range(0,len(doc))))
         col1.markdown("<h4 style='text-align: center; color: grey;'> Hypothesis: Larger the Fonts, Important the message </h4>", unsafe_allow_html=True)
-        dg = pd.read_csv('/Users/mishrs39/Downloads/test_breast_file_csv_updated_3.csv')
+        dg = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/test_breast_file_csv_updated_3.csv')
         font_dg = pd.DataFrame(dg[['page','font','size']].value_counts()).reset_index().sort_values('size',ascending=False).reset_index(drop=True)
         #font_dg = font_dg[font_dg['page']==page_option]
         col1.dataframe(font_dg)
@@ -274,7 +274,7 @@ if uploaded_file is not None:
         #col1.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding Based on Fonts Size (Larger the Fonts Important the message) </h3>", unsafe_allow_html=True)
 
         col2.markdown("<h4 style='text-align: center; color: grey;'> Extract Concepts for Highest font size/Type from NLP Based Pipeline (QA,GEN AI, Taxonomy) </h4>", unsafe_allow_html=True)
-        dg_g = pd.read_csv('/Users/mishrs39/Downloads/LLM_Based_Summary.csv')
+        dg_g = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/LLM_Based_Summary.csv')
         col2.dataframe(dg_g)
         col2.markdown("<h4 style='text-align: center; color: grey;'> Short Summary based on NLP Model </h4>", unsafe_allow_html=True)
 
