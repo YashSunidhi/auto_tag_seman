@@ -14,3 +14,4 @@ tiktoken
 panel
 notebook
 faiss-cpu
+llm-rs
