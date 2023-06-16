@@ -6,9 +6,10 @@ import base64
 from pathlib import Path
 from PIL import Image
 import re
+from st_aggrid import AgGrid
 import pandas as pd
 import ast
-
+from streamlit_chat import message
 
 import os 
 from langchain.chains import RetrievalQA
@@ -27,11 +28,16 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 import faiss
 import time
-from llm_rs.langchain import RustformersLLM
-from langchain import PromptTemplate
-from langchain.chains import LLMChain
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-
+import json
+from sentence_transformers import SentenceTransformer, CrossEncoder, util
+import gzip
+import os
+import torch
+from rank_bm25 import BM25Okapi
+from sklearn.feature_extraction import _stop_words
+import string
+from tqdm.autonotebook import tqdm
+import numpy as np
 
 import streamlit as st
 from helpers import (
@@ -121,9 +127,9 @@ if uploaded_file is not None:
         val = f"image_{page_option+1}.png"
         page = doc.load_page(page_option)
         pix = page.get_pixmap(matrix=mat)
-        pix.save("https://github.com/YashSunidhi/auto_tag_seman/blob/main/"+str(val))
+        pix.save(os.path.join(os.getcwd(),str(val)))
 
-        imager = Image.open("https://github.com/YashSunidhi/auto_tag_seman/blob/main/"+str(val))
+        imager = Image.open(os.path.join(os.getcwd(),str(val)))
         col1.image(imager, caption=val)
         col1.markdown('### Raw Text from Page')
         page = doc[page_option]
@@ -185,7 +191,7 @@ if uploaded_file is not None:
         page_option = st.sidebar.selectbox(
         'Page Selection',
         (range(0,len(doc))))
-        dg = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/test_breast_file_csv_updated_3.csv')
+        dg = pd.read_csv(os.path.join(os.getcwd(), 'test_breast_file_csv_updated_3.csv'))
         tot12 = dg[dg['page'] ==page_option][['page','blocks','text', 'med_ner','epid_ner']].replace('Reference:','').replace('References:','').drop_duplicates().groupby(['page','blocks']).agg({'text':''.join, 'med_ner':''.join, 'epid_ner':''.join}).drop_duplicates().reset_index(drop=True)
         col1.dataframe(tot12[:-3])
 
@@ -266,7 +272,7 @@ if uploaded_file is not None:
         # 'Page Selection',
         # (range(0,len(doc))))
         col1.markdown("<h4 style='text-align: center; color: grey;'> Hypothesis: Larger the Fonts, Important the message </h4>", unsafe_allow_html=True)
-        dg = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/test_breast_file_csv_updated_3.csv')
+        dg = pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
         font_dg = pd.DataFrame(dg[['page','font','size']].value_counts()).reset_index().sort_values('size',ascending=False).reset_index(drop=True)
         #font_dg = font_dg[font_dg['page']==page_option]
         col1.dataframe(font_dg)
@@ -278,7 +284,7 @@ if uploaded_file is not None:
         #col1.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding Based on Fonts Size (Larger the Fonts Important the message) </h3>", unsafe_allow_html=True)
 
         col2.markdown("<h4 style='text-align: center; color: grey;'> Extract Concepts for Highest font size/Type from NLP Based Pipeline (QA,GEN AI, Taxonomy) </h4>", unsafe_allow_html=True)
-        dg_g = pd.read_csv('https://github.com/YashSunidhi/auto_tag_seman/blob/main/LLM_Based_Summary.csv')
+        dg_g = pd.read_csv(os.path.join(os.getcwd(),'LLM_Based_Summary.csv'))
         col2.dataframe(dg_g)
         col2.markdown("<h4 style='text-align: center; color: grey;'> Short Summary based on NLP Model </h4>", unsafe_allow_html=True)
 
@@ -287,116 +293,174 @@ if uploaded_file is not None:
         st.markdown("<h3 style='text-align: center; color: grey;'> Semantic Search within Document </h3>", unsafe_allow_html=True)
         st.sidebar.markdown("## Semantic Search ")
 
-        try:
-            input_text = st.text_area('Input Reference Text','')
-            question_asked = st.text_area('Input your query','Extract all topics from text'+ str(input_text)
-            template="""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-            ### Instruction:
-            {instruction}
-            ### Response:
-            Answer:"""
+       
+        # read hotel reviews dataframe
+
+        data=pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
+        # Load a pre-trained model
+
+        model =SentenceTransformer('msmarco-MiniLM-L-12-v3')
+        passages=list(set(data.groupby(['page', 'blocks']).agg({'text':' '.join,'font':'unique','size':'unique'})['text']))
+        #We use the Bi-Encoder to encode all passages, so that we can use it with sematic search
+        bi_encoder = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1')
+        bi_encoder.max_seq_length = 256     #Truncate long passages to 256 tokens
+        top_k = 32                          #Number of passages we want to retrieve with the bi-encoder
+
+        #The bi-encoder will retrieve 100 documents. We use a cross-encoder, to re-rank the results list to improve the quality
+        cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+        # As dataset, we use Simple English Wikipedia. Compared to the full English wikipedia, it has only
+        # about 170k articles. We split these articles into paragraphs and encode them with the bi-encoder
+
+
+        print("Passages:", len(passages))
+
+        # We encode all passages into our vector space. This takes about 5 minutes (depends on your GPU speed)
+        corpus_embeddings = bi_encoder.encode(passages, convert_to_tensor=True, show_progress_bar=True)
+        # embed hotel reviews
+        # We lower case our text and remove stop-words from indexing
+        def bm25_tokenizer(text):
+            tokenized_doc = []
+            for token in text.lower().split():
+                token = token.strip(string.punctuation)
+
+                if len(token) > 0 and token not in _stop_words.ENGLISH_STOP_WORDS:
+                    tokenized_doc.append(token)
+            return tokenized_doc
+
+
+        tokenized_corpus = []
+        for passage in tqdm(passages):
+            tokenized_corpus.append(bm25_tokenizer(passage))
+
+        bm25 = BM25Okapi(tokenized_corpus)
+        def search(query):
+            print("Input question:", query)
+
+            ##### BM25 search (lexical search) #####
+            bm25_scores = bm25.get_scores(bm25_tokenizer(query))
+            top_n = np.argpartition(bm25_scores, -5)[-5:]
+            bm25_hits = [{'corpus_id': idx, 'score': bm25_scores[idx]} for idx in top_n]
+            bm25_hits = sorted(bm25_hits, key=lambda x: x['score'], reverse=True)
             
-            prompt = PromptTemplate(input_variables=["instruction"],template=template,)
+            print("Top-3 lexical search (BM25) hits")
+            for hit in bm25_hits[0:3]:
+                print("\t{:.3f}\t{}".format(hit['score'], passages[hit['corpus_id']].replace("\n", " ")))
+
+            ##### Sematic Search #####
+            # Encode the query using the bi-encoder and find potentially relevant passages
+            question_embedding = bi_encoder.encode(query, convert_to_tensor=True)
+            question_embedding = question_embedding#.cuda()
+            hits = util.semantic_search(question_embedding, corpus_embeddings, top_k=top_k)
+            hits = hits[0]  # Get the hits for the first query
+
+            ##### Re-Ranking #####
+            # Now, score all retrieved passages with the cross_encoder
+            cross_inp = [[query, passages[hit['corpus_id']]] for hit in hits]
+            cross_scores = cross_encoder.predict(cross_inp)
+
+            # Sort results by the cross-encoder scores
+            for idx in range(len(cross_scores)):
+                hits[idx]['cross-score'] = cross_scores[idx]
+
+            # Output of top-5 hits from bi-encoder
+            print("\n-------------------------\n")
+            print("Top-3 Bi-Encoder Retrieval hits")
+            hits = sorted(hits, key=lambda x: x['score'], reverse=True)
+            for hit in hits[0:3]:
+                print("\t{:.3f}\t{}".format(hit['score'], passages[hit['corpus_id']].replace("\n", " ")))
+
+            # Output of top-5 hits from re-ranker
+            print("\n-------------------------\n")
+            print("Top-3 Cross-Encoder Re-ranker hits")
+            hits = sorted(hits, key=lambda x: x['cross-score'], reverse=True)
+            for hit in hits[0:3]:
+                print("\t{:.3f}\t{}".format(hit['cross-score'], passages[hit['corpus_id']].replace("\n", " ")))
+            return hits, bm25_hits
+        question_asked = st.text_area('Input your query','')
+        results=search(query = question_asked)
+
+        bm = pd.DataFrame(results[1])
+        bm['text'] = bm['corpus_id'].apply(lambda m :passages[m] )
+
+        bm_bis = pd.DataFrame(results[0])
+        bm_bis = bm_bis.sort_values('score',ascending=False)
+        bm_bis['text'] = bm_bis['corpus_id'].apply(lambda m :passages[m])
+      
+
+        bm_co = pd.DataFrame(results[0])
+        bm_co = bm_co.sort_values('cross-score',ascending=False)
+        bm_co['text'] = bm_co['corpus_id'].apply(lambda m :passages[m])
+   
+        st.markdown('lexical search (BM25) hits')
+        st.dataframe(bm[['score','text']])
+        st.markdown('Bi-Encoder Retrieval hits')
+        st.dataframe(bm_bis[['score','text']][:10])
+        st.markdown('Cross-Encoder Re-ranker hits')
+        st.dataframe(bm_co[['cross-score','text']][:10])
             
-            llm = RustformersLLM(model_path_or_repo_id="rustformers/mpt-7b-ggml",model_file="mpt-7b-instruct-q5_1-ggjt.bin",callbacks=[StreamingStdOutCallbackHandler()])
-            
-            chain = LLMChain(llm=llm, prompt=prompt)
-            
-            fyt = chain.run(question_asked)
-            st.write(fyt)
-            # # read hotel reviews dataframe
-
-            # data=pd.read_csv('/Users/mishrs39/Downloads/test_breast_file_csv_updated_3.csv')
-            # # Load a pre-trained model
-
-            # model =SentenceTransformer('msmarco-MiniLM-L-12-v3')
-            # hotel_reviews=data["text"].tolist()
-
-            # # embed hotel reviews
-
-            # hotel_reviews_embds=model.encode(hotel_reviews)
-
-            # # Create an index using FAISS
-            # index = faiss.IndexFlatL2(hotel_reviews_embds.shape[1])
-            # index.add(hotel_reviews_embds)
-            # faiss.write_index(index, 'index_hotel_reviews')
-            # index = faiss.read_index('index_hotel_reviews')
-
-
-            # def search(query):
-    
-            #     t=time.time()
-            #     query_vector = model.encode([query])
-            #     k = 5
-            #     top_k = index.search(query_vector, k)
-            #     print('totaltime: {}'.format(time.time()-t))
-            #     return [hotel_reviews[_id] for _id in top_k[1].tolist()[0]]
-            # question_asked = st.text_area('Input your query','')
-            # results=search(question_asked)
-            # st.write(results)
-            
 
 
 
-        except:
-            open_ai_key = st.sidebar.text_area('Input Your Open AI Key',' ')
-            relevant_chunks = st.sidebar.selectbox(
-            'Relevant Chunks',
-            (range(2,7)))
+        # except:
+        #     open_ai_key = st.sidebar.text_area('Input Your Open AI Key',' ')
+        #     relevant_chunks = st.sidebar.selectbox(
+        #     'Relevant Chunks',
+        #     (range(2,7)))
 
-            chain_type = st.sidebar.selectbox(
-            'Chain Type',
-            (['stuff', 'map_reduce', "refine", "map_rerank"]))
+        #     chain_type = st.sidebar.selectbox(
+        #     'Chain Type',
+        #     (['stuff', 'map_reduce', "refine", "map_rerank"]))
 
             
-            question_asked = st.text_area('Input your query','')
+        #     question_asked = st.text_area('Input your query','')
             
-            question_asked_predefined = st.sidebar.selectbox(
-            'Pre-Defined Queries',
-            (['identify all concepts discussed around quality of life', 'identify all concepts discussed aboutr efficacy']))
+        #     question_asked_predefined = st.sidebar.selectbox(
+        #     'Pre-Defined Queries',
+        #     (['identify all concepts discussed around quality of life', 'identify all concepts discussed aboutr efficacy']))
 
 
-            #function to formulate question answer
-            def qa(file, query, chain_type, k):
-                # load document
-                loader = PyPDFLoader(file)
-                documents = loader.load()
-                # split the documents into chunks
-                text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-                texts = text_splitter.split_documents(documents)
-                # select which embeddings we want to use
-                embeddings = OpenAIEmbeddings()
-                # create the vectorestore to use as the index
-                db = Chroma.from_documents(texts, embeddings)
-                # expose this index in a retriever interface
-                retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": k})
-                # create a chain to answer questions 
-                qa = RetrievalQA.from_chain_type(
-                    llm=OpenAI(), chain_type=chain_type, retriever=retriever, return_source_documents=True)
-                result = qa({"query": query})
-                print(result['result'])
-                return result  
-            #convos = []  # store all panel objects in a list
+        #     #function to formulate question answer
+        #     def qa(file, query, chain_type, k):
+        #         # load document
+        #         loader = PyPDFLoader(file)
+        #         documents = loader.load()
+        #         # split the documents into chunks
+        #         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        #         texts = text_splitter.split_documents(documents)
+        #         # select which embeddings we want to use
+        #         embeddings = OpenAIEmbeddings()
+        #         # create the vectorestore to use as the index
+        #         db = Chroma.from_documents(texts, embeddings)
+        #         # expose this index in a retriever interface
+        #         retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": k})
+        #         # create a chain to answer questions 
+        #         qa = RetrievalQA.from_chain_type(
+        #             llm=OpenAI(), chain_type=chain_type, retriever=retriever, return_source_documents=True)
+        #         result = qa({"query": query})
+        #         print(result['result'])
+        #         return result  
+        #     #convos = []  # store all panel objects in a list
 
-            def qa_result(_):
-                os.environ["OPENAI_API_KEY"] = open_ai_key.value
+        #     def qa_result(_):
+        #         os.environ["OPENAI_API_KEY"] = open_ai_key.value
                 
-                # save pdf file to a temp file 
-                if uploaded_file.value is not None:
-                    uploaded_file.save("/.cache/temp.pdf")
-                    try:
-                        prompt_text = question_asked.value
-                    except:
-                        prompt_text = question_asked_predefined.value
+        #         # save pdf file to a temp file 
+        #         if uploaded_file.value is not None:
+        #             uploaded_file.save("/.cache/temp.pdf")
+        #             try:
+        #                 prompt_text = question_asked.value
+        #             except:
+        #                 prompt_text = question_asked_predefined.value
 
-                    if prompt_text:
-                        result = qa(file=uploaded_file, query=prompt_text, chain_type=chain_type.value, k=relevant_chunks.value) 
-                return result
+        #             if prompt_text:
+        #                 result = qa(file=uploaded_file, query=prompt_text, chain_type=chain_type.value, k=relevant_chunks.value) 
+        #         return result
             
-            if open_ai_key is not None:
-                temp = qa_result
+        #     if open_ai_key is not None:
+        #         temp = qa_result
 
-            st.write(temp)
+        #     st.write(temp)
 
 
 
