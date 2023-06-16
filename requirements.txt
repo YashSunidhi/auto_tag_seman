@@ -15,3 +15,4 @@ panel
 notebook
 faiss-cpu
 llm-rs
+rank_bm25
