@@ -27,6 +27,11 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 import faiss
 import time
+from llm_rs.langchain import RustformersLLM
+from langchain import PromptTemplate
+from langchain.chains import LLMChain
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
 
 import streamlit as st
 from helpers import (
@@ -283,36 +288,52 @@ if uploaded_file is not None:
         st.sidebar.markdown("## Semantic Search ")
 
         try:
-            # read hotel reviews dataframe
+            input_text = st.text_area('Input Reference Text','')
+            question_asked = st.text_area('Input your query','Extract all topics from text'+ str(input_text)
+            template="""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+            ### Instruction:
+            {instruction}
+            ### Response:
+            Answer:"""
+            
+            prompt = PromptTemplate(input_variables=["instruction"],template=template,)
+            
+            llm = RustformersLLM(model_path_or_repo_id="rustformers/mpt-7b-ggml",model_file="mpt-7b-instruct-q5_1-ggjt.bin",callbacks=[StreamingStdOutCallbackHandler()])
+            
+            chain = LLMChain(llm=llm, prompt=prompt)
+            
+            fyt = chain.run(question_asked)
+            st.write(fyt)
+            # # read hotel reviews dataframe
 
-            data=pd.read_csv('/Users/mishrs39/Downloads/test_breast_file_csv_updated_3.csv')
-            # Load a pre-trained model
+            # data=pd.read_csv('/Users/mishrs39/Downloads/test_breast_file_csv_updated_3.csv')
+            # # Load a pre-trained model
 
-            model =SentenceTransformer('msmarco-MiniLM-L-12-v3')
-            hotel_reviews=data["text"].tolist()
+            # model =SentenceTransformer('msmarco-MiniLM-L-12-v3')
+            # hotel_reviews=data["text"].tolist()
 
-            # embed hotel reviews
+            # # embed hotel reviews
 
-            hotel_reviews_embds=model.encode(hotel_reviews)
+            # hotel_reviews_embds=model.encode(hotel_reviews)
 
-            # Create an index using FAISS
-            index = faiss.IndexFlatL2(hotel_reviews_embds.shape[1])
-            index.add(hotel_reviews_embds)
-            faiss.write_index(index, 'index_hotel_reviews')
-            index = faiss.read_index('index_hotel_reviews')
+            # # Create an index using FAISS
+            # index = faiss.IndexFlatL2(hotel_reviews_embds.shape[1])
+            # index.add(hotel_reviews_embds)
+            # faiss.write_index(index, 'index_hotel_reviews')
+            # index = faiss.read_index('index_hotel_reviews')
 
 
-            def search(query):
+            # def search(query):
     
-                t=time.time()
-                query_vector = model.encode([query])
-                k = 5
-                top_k = index.search(query_vector, k)
-                print('totaltime: {}'.format(time.time()-t))
-                return [hotel_reviews[_id] for _id in top_k[1].tolist()[0]]
-            question_asked = st.text_area('Input your query','')
-            results=search(question_asked)
-            st.write(results)
+            #     t=time.time()
+            #     query_vector = model.encode([query])
+            #     k = 5
+            #     top_k = index.search(query_vector, k)
+            #     print('totaltime: {}'.format(time.time()-t))
+            #     return [hotel_reviews[_id] for _id in top_k[1].tolist()[0]]
+            # question_asked = st.text_area('Input your query','')
+            # results=search(question_asked)
+            # st.write(results)
             
 
 
