@@ -9,7 +9,15 @@ import re
 
 import pandas as pd
 import ast
-
+from torch import cuda, bfloat16
+import transformers
+import torch
+from transformers import StoppingCriteria, StoppingCriteriaList
+from langchain.llms import HuggingFacePipeline
+from langchain.document_loaders import PyPDFDirectoryLoader
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import ConversationalRetrievalChain
 
 import os 
 from langchain.chains import RetrievalQA
@@ -57,7 +65,8 @@ from helpers import (
 from config import PDF_DATA_KEY, TEXT_DATA_KEY
 
 st.set_page_config(layout="wide")
-st.markdown("<h1 style='text-align: center; color: black;'> Content Auto-Tagging Application </h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black;'> ContentSculpt </h1>", unsafe_allow_html=True)
+st.markdown("<h6 style='text-align: center; color: black;'> Intelligent Content Drafing Suite </h6>", unsafe_allow_html=True)
 uploaded_file = st.sidebar.file_uploader("Upload a PDF File",type= 'pdf' , key="file")
 if uploaded_file is not None:
     def main_page(uploaded_file = uploaded_file):
@@ -264,6 +273,97 @@ if uploaded_file is not None:
         #tt34x = tt34x[tt34x['text'].isin(tot12.text.to_list())]
         col2.dataframe(tt34x)
 
+    def page6():
+        st.markdown("<h3 style='text-align: center; color: grey;'> Instruction Based Promotional Content Generation </h3>", unsafe_allow_html=True)
+        #######
+        # define custom stopping criteria object
+        class StopOnTokens(StoppingCriteria):
+            def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
+                for stop_ids in stop_token_ids:
+                    if torch.eq(input_ids[0][-len(stop_ids):], stop_ids).all():
+                        return True
+                return False
+
+        stopping_criteria = StoppingCriteriaList([StopOnTokens()])
+
+        ### Model Loading
+        #model_id = 'meta-llama/Llama-2-13b-chat-hf'
+        model_id = "conceptofmind/Yarn-Llama-2-13b-128k"
+
+        device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
+
+        # set quantization configuration to load large model with less GPU memory
+        # this requires the `bitsandbytes` library
+        bnb_config = transformers.BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=bfloat16
+        )
+
+        # begin initializing HF items, you need an access token
+        hf_auth = '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'
+        model_config = transformers.AutoConfig.from_pretrained(
+            model_id,
+            use_auth_token=hf_auth
+        )
+
+        model = transformers.AutoModelForCausalLM.from_pretrained(
+            model_id,
+            trust_remote_code=True,
+            config=model_config,
+            quantization_config=bnb_config,
+            device_map='auto',
+            use_auth_token=hf_auth
+        )
+
+        # enable evaluation mode to allow model inference
+        model.eval()
+
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_id,
+            use_auth_token=hf_auth
+        )
+
+        stop_list = ['\nHuman:', '\n```\n']
+        stop_token_ids = [tokenizer(x)['input_ids'] for x in stop_list]
+        stop_token_ids = [torch.LongTensor(x).to(device) for x in stop_token_ids]
+
+        generate_text = transformers.pipeline(
+            model=model,
+            tokenizer=tokenizer,
+            return_full_text=True,  # langchain expects the full text
+            task='text-generation',
+            # we pass model parameters here too
+            stopping_criteria=stopping_criteria,  # without this model rambles during chat
+            temperature=0.1,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+            max_new_tokens=512,  # max number of tokens to generate in the output
+            repetition_penalty=1.1  # without this output begins repeating
+        )
+
+        # Get the input text from the user
+        st.title("Marketing Compaign Generator")
+        input_text = st.text_input("Enter the prompt/instruction for the newsletter:")
+        prompt = input_text #"Generate a newsletter that captures the logical dependencies present in the provided context. Identify and highlight the relationships, cause-and-effect connections, and sequential progressions among different pieces of information. Ensure that the generated newsletter effectively communicates the flow of events, insights, or concepts by showcasing their interconnectedness and logical coherence if any from text with formal word included "  + str('""" ') + str(text) + str(' """')
+
+        prompt_template=f'''
+
+        USER: {prompt}
+
+        ASSISTANT: Write an impressive newsletter with Retrospectives and Prospectives finds for mentioned product. Please say Not Applicable if you are not confident or honest about outcome:
+        '''
+        response=generate_text(prompt_template)
+        output_text = response[0]["generated_text"]
+
+        # Get the input text from the user
+        st.title("Generated Outcome")
+        st.write(output_text)
+        
+        st.title("Visuals Generation for Marketing Compaign")
+
+        # Get the input text from the user
+        input_text = st.text_input("Enter the prompt/instruction for the Visuals:")
+
 
     def page3(uploaded_file = uploaded_file):
         st.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding based on Hypothesis </h3>", unsafe_allow_html=True)
@@ -272,15 +372,52 @@ if uploaded_file is not None:
         # 'Page Selection',
         # (range(0,len(doc))))
         col1.markdown("<h4 style='text-align: center; color: grey;'> Hypothesis: Larger the Fonts, Important the message </h4>", unsafe_allow_html=True)
-        dg = pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
+        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf") 
+        mnbb = []
+        for p in range(0,len(doc)):
+            page = doc[p]
+            # text = page.get_text(text_options)
+            #page = doc[1]
+            #mnb = []
+            all_infos = page.get_text("dict", sort=True)
+            for i in range(0, len(all_infos['blocks'])):
+                try:
+                    for n in  range(0, len(all_infos['blocks'][i]['lines'])):
+                        m = pd.DataFrame.from_dict(all_infos)['blocks'][i]['lines'][n]['spans'][0]
+                        res = {key: m[key] for key in m.keys()
+                                & {'size', 'flags', 'font', 'color', 'ascender', 'descender', 'text'}}
+                        print(res)
+
+                        mm = pd.DataFrame(list(res.keys()), columns = ['Key Text Attribute'])
+                        mm['Text Attribute Value'] = list(res.values())
+                        
+
+
+                        mmm = mm.T
+                        mmm.columns = mmm.iloc[0]
+                        mmm = mmm[1:]
+                        mmm['page'] = p
+                        mmm['blocks'] = i
+                        mmm['lines'] = n
+                        mnbb.append(mmm)
+                except:
+                    pass
+        dg = pd.concat(mnbb).reset_index(drop=True)
+        
+        #dg = pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
         font_dg = pd.DataFrame(dg[['page','font','size']].value_counts()).reset_index().sort_values('size',ascending=False).reset_index(drop=True)
         #font_dg = font_dg[font_dg['page']==page_option]
         col1.dataframe(font_dg)
         
-        
+        fontt = font_dg['font'][:10].to_list()
+        print(fontt)
         col1.markdown("<h4 style='text-align: center; color: grey;'> All text/messages subject to their font Size/Type </h4>", unsafe_allow_html=True)
-        rot = dg[dg['font']=='ConduitITC-Bold'][['page','blocks','text']].replace('Reference:','').replace('References:','').drop_duplicates().groupby(['page']).agg({'text':''.join}).drop_duplicates().reset_index(drop=True)##['text'].to_list())
-        col1.dataframe(rot['text'])
+        try:
+            rot = dg[dg['font']=='Calibri-Bold'][['page','blocks','text']].replace('Reference:','').replace('References:','').drop_duplicates().groupby(['page']).agg({'text':''.join}).drop_duplicates().reset_index(drop=True)##['text'].to_list())
+            col1.dataframe(rot['text'])
+        except:
+            rot = dg[dg['font'].isin(fontt)][['page','blocks','text']].replace('Reference:','').replace('References:','').drop_duplicates().groupby(['page']).agg({'text':''.join}).drop_duplicates().reset_index(drop=True)##['text'].to_list())
+            col1.dataframe(rot['text'])
         #col1.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding Based on Fonts Size (Larger the Fonts Important the message) </h3>", unsafe_allow_html=True)
 
         col2.markdown("<h4 style='text-align: center; color: grey;'> Extract Concepts for Highest font size/Type from NLP Based Pipeline (QA,GEN AI, Taxonomy) </h4>", unsafe_allow_html=True)
@@ -520,10 +657,11 @@ if uploaded_file is not None:
 
     page_names_to_funcs = {
         "Intelligent Data Parsing": main_page,
-        "Non - Contextual Tags, Iterate over pages": page2,
         "Contextual Tags (Based on Hypothesis)": page3,
         "Full Document Summary (Image and Text)": page5,
-        "Search across Document": page4,
+        "Content Generation" : page6,
+        #"Non - Contextual Tags, Iterate over pages": page2,
+        #"Search across Document": page4,
     }
 
     selected_page = st.sidebar.selectbox("# Analysis Selection", page_names_to_funcs.keys())
