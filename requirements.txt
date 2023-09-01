@@ -16,3 +16,11 @@ notebook
 faiss-cpu
 llm-rs
 rank_bm25
+transformers 
+accelerate 
+einops 
+langchain 
+xformers 
+bitsandbytes 
+faiss-gpu 
+pypdf
