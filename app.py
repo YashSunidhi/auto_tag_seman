@@ -287,8 +287,8 @@ if uploaded_file is not None:
         stopping_criteria = StoppingCriteriaList([StopOnTokens()])
 
         ### Model Loading
-        #model_id = 'meta-llama/Llama-2-13b-chat-hf'
-        model_id = "conceptofmind/Yarn-Llama-2-13b-128k"
+        model_id = 'meta-llama/Llama-2-13b-chat-hf'
+        #model_id = "conceptofmind/Yarn-Llama-2-13b-128k"
 
         device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 
