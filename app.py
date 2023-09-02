@@ -355,7 +355,7 @@ if uploaded_file is not None:
 
         USER: {prompt}
 
-        ASSISTANT: Write an impressive newsletter with Retrospectives and Prospectives finds for mentioned product. Please say Not Applicable if you are not confident or honest about outcome:
+        ASSISTANT:
         '''
         response=generate_text(prompt_template)
         output_text = response[0]["generated_text"]
@@ -365,53 +365,53 @@ if uploaded_file is not None:
         st.write(output_text)
 
         st.title("Visuals Generation for Marketing Compaign")
-        use_refiner = False
-        pipe = DiffusionPipeline.from_pretrained(
-          "stabilityai/stable-diffusion-xl-base-1.0",
-          torch_dtype=torch.float16,
-          use_safetensors=True,
-          variant="fp16",
-          )
+        # use_refiner = False
+        # pipe = DiffusionPipeline.from_pretrained(
+        #   "stabilityai/stable-diffusion-xl-base-1.0",
+        #   torch_dtype=torch.float16,
+        #   use_safetensors=True,
+        #   variant="fp16",
+        #   )
 
-        if use_refiner:
-          refiner = DiffusionPipeline.from_pretrained(
-              "stabilityai/stable-diffusion-xl-refiner-1.0",
-              text_encoder_2=pipe.text_encoder_2,
-              vae=pipe.vae,
-              torch_dtype=torch.float16,
-              use_safetensors=True,
-              variant="fp16",
-          )
+        # if use_refiner:
+        #   refiner = DiffusionPipeline.from_pretrained(
+        #       "stabilityai/stable-diffusion-xl-refiner-1.0",
+        #       text_encoder_2=pipe.text_encoder_2,
+        #       vae=pipe.vae,
+        #       torch_dtype=torch.float16,
+        #       use_safetensors=True,
+        #       variant="fp16",
+        #   )
 
-          refiner = refiner.to("cuda")
+        #   refiner = refiner.to("cuda")
 
-          pipe.enable_model_cpu_offload()
-        else:
-          pipe = pipe.to("cuda")
+        #   pipe.enable_model_cpu_offload()
+        # else:
+        #   pipe = pipe.to("cuda")
 
 
-        # Get the input text from the user
-        input_text = st.text_input("Enter the prompt/instruction for the Visuals:")
-        seed = random.randint(0, sys.maxsize)
+        # # Get the input text from the user
+        # input_text = st.text_input("Enter the prompt/instruction for the Visuals:")
+        # seed = random.randint(0, sys.maxsize)
 
-        images = pipe(
-            prompt = input_text,
-            output_type = "latent" if use_refiner else "pil",
-            generator = torch.Generator("cuda").manual_seed(seed),
-            ).images
+        # images = pipe(
+        #     prompt = input_text,
+        #     output_type = "latent" if use_refiner else "pil",
+        #     generator = torch.Generator("cuda").manual_seed(seed),
+        #     ).images
 
-        if use_refiner:
-          images = refiner(
-              prompt = input_text,
-              image = images,
-              ).images
+        # if use_refiner:
+        #   images = refiner(
+        #       prompt = input_text,
+        #       image = images,
+        #       ).images
 
-        print(f"Prompt:\t{input_text}\nSeed:\t{seed}")
-        media.show_images(images)
-        images[0].save("/content/output.jpg")
-        image = Image.open('/content/output.jpg')
+        # print(f"Prompt:\t{input_text}\nSeed:\t{seed}")
+        # media.show_images(images)
+        # images[0].save("/content/output.jpg")
+        # image = Image.open('/content/output.jpg')
 
-        st.image(image, caption='Sunrise by the mountains')
+        # st.image(image, caption='Sunrise by the mountains')
 
 
     def page3(uploaded_file = uploaded_file):
