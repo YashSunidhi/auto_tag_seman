@@ -6,7 +6,12 @@ import base64
 from pathlib import Path
 from PIL import Image
 import re
+import mediapy as media
+import random
+import sys
+import torch
 
+from diffusers import DiffusionPipeline
 import pandas as pd
 import ast
 from torch import cuda, bfloat16
@@ -19,7 +24,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 
-import os 
+import os
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 from langchain.document_loaders import TextLoader
@@ -49,11 +54,11 @@ import numpy as np
 
 import streamlit as st
 from helpers import (
-    upload_pdf_file, 
-    create_space, 
-    image_extraction_component, 
-    get_pdf_from_link, 
-    return_pdf_data, 
+    upload_pdf_file,
+    create_space,
+    image_extraction_component,
+    get_pdf_from_link,
+    return_pdf_data,
     text_summary_component,
     set_session_state_key,
     sidebar_widget,
@@ -73,7 +78,7 @@ if uploaded_file is not None:
         st.sidebar.markdown("## Intelligent Document Extraction Assesment ")
         #uploaded_file = st.sidebar.file_uploader("Upload a PDF File",type= 'pdf' , key="file")
         #if uploaded_file is not None:
-            
+
         # progress_bar = st.sidebar.progress(0)
         # for perc_completed in range(100):
         #     time.sleep(0.005)
@@ -84,7 +89,7 @@ if uploaded_file is not None:
         with st.expander(label="# This Page Explains Difference between Intelligent Data Extraction vs Raw Extraction", expanded=True):
             st.markdown("""
 
-            1) Upload a PDF file 
+            1) Upload a PDF file
 
             2) Visualize the page
 
@@ -92,7 +97,7 @@ if uploaded_file is not None:
 
             4) Observe Outcome from Intelligent Data Extraction
 
-            5) Analyze meta data 
+            5) Analyze meta data
             """)
         "---"
 
@@ -116,20 +121,20 @@ if uploaded_file is not None:
     # col1.image(im, output_format='JPEG')
 
     #fname = uploaded_doc #sys.argv[1]  # get document filename
-    # try: 
+    # try:
     #     doc = fitz.open("pdf", st.session_state.file.read())  # open document
     # except:
     #     doc = fitz.open("/Users/mishrs39/Downloads/test_breast_file.pdf")
-        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf") 
+        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
         page_option = st.sidebar.selectbox(
         'Page Selection',
         (range(0,len(doc))))
 
         # text_option = st.sidebar.selectbox(
         # 'Page Selection',
-        # ('text', 'blocks', 'words', 'html', 
+        # ('text', 'blocks', 'words', 'html',
         #     'dict', 'json', 'rawDict', 'xhtml', 'xml'))
-            
+
 
         zoom = 4
         mat = fitz.Matrix(zoom, zoom)
@@ -162,7 +167,7 @@ if uploaded_file is not None:
 
                     mm = pd.DataFrame(list(res.keys()), columns = ['Key Text Attribute'])
                     mm['Text Attribute Value'] = list(res.values())
-                    
+
 
 
                     mmm = mm.T
@@ -179,7 +184,7 @@ if uploaded_file is not None:
 
         option = st.sidebar.selectbox(
         'Document Granularity Selection',
-        ('blocks','page', 'lines', 'size', 
+        ('blocks','page', 'lines', 'size',
             'flags'))
 
         tom = tt.groupby(option).agg({'text':' '.join,'font':'unique','size':'unique'})[:]
@@ -259,7 +264,7 @@ if uploaded_file is not None:
             gc = pd.concat(tt).reset_index(drop=True)
 
             return gc
-        
+
         tot = []
         for j in ['umls_entity','rxnorm_entity','mesh_entity','go_entity','hpo_entity']:
             for i in dg.page.unique():
@@ -276,45 +281,137 @@ if uploaded_file is not None:
     def page6():
         st.markdown("<h3 style='text-align: center; color: grey;'> Instruction Based Promotional Content Generation </h3>", unsafe_allow_html=True)
         #######
-        
+        # define custom stopping criteria object
+        class StopOnTokens(StoppingCriteria):
+            def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
+                for stop_ids in stop_token_ids:
+                    if torch.eq(input_ids[0][-len(stop_ids):], stop_ids).all():
+                        return True
+                return False
+
+        stopping_criteria = StoppingCriteriaList([StopOnTokens()])
+
+        ### Model Loading
+        model_id = 'meta-llama/Llama-2-7b-chat-hf'
+        #model_id = "conceptofmind/Yarn-Llama-2-13b-128k"
+
+        device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
+
+        # set quantization configuration to load large model with less GPU memory
+        # this requires the `bitsandbytes` library
+        bnb_config = transformers.BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=bfloat16
+        )
+
         # begin initializing HF items, you need an access token
-        import requests
+        hf_auth = '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'
+        model_config = transformers.AutoConfig.from_pretrained(
+            model_id,
+            use_auth_token=hf_auth
+        )
 
-        API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-13b-chat-hf"
-        headers = {"Authorization": "Bearer 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"}
+        model = transformers.AutoModelForCausalLM.from_pretrained(
+            model_id,
+            trust_remote_code=True,
+            config=model_config,
+            quantization_config=bnb_config,
+            device_map='auto',
+            use_auth_token=hf_auth
+        )
 
-        def query(payload):
-            response = requests.post(API_URL, headers=headers, json=payload)
-            return response.json()
-            
-        output = query({
-            "inputs": "Can you please let us know more details about your ",
-        })
+        # enable evaluation mode to allow model inference
+        model.eval()
+
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_id,
+            use_auth_token=hf_auth
+        )
+
+        stop_list = ['\nHuman:', '\n```\n']
+        stop_token_ids = [tokenizer(x)['input_ids'] for x in stop_list]
+        stop_token_ids = [torch.LongTensor(x).to(device) for x in stop_token_ids]
+
+        generate_text = transformers.pipeline(
+            model=model,
+            tokenizer=tokenizer,
+            return_full_text=True,  # langchain expects the full text
+            task='text-generation',
+            # we pass model parameters here too
+            stopping_criteria=stopping_criteria,  # without this model rambles during chat
+            temperature=0.1,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+            max_new_tokens=512,  # max number of tokens to generate in the output
+            repetition_penalty=1.1  # without this output begins repeating
+        )
 
         # Get the input text from the user
         st.title("Marketing Compaign Generator")
         input_text = st.text_input("Enter the prompt/instruction for the newsletter:")
-        prompt = input_text #"Generate a newsletter that captures the logical dependencies present in the provided context. Identify and highlight the relationships, cause-and-effect connections, and sequential progressions among different pieces of information. Ensure that the generated newsletter effectively communicates the flow of events, insights, or concepts by showcasing their interconnectedness and logical coherence if any from text with formal word included "  + str('""" ') + str(text) + str(' """')
+        prompt = "Generate a newsletter that captures the logical dependencies kadcyla success. Identify and highlight the relationships, cause-and-effect connections, and sequential progressions among different pieces of information. Ensure that the generated newsletter effectively communicates the flow of events, insights, or concepts by showcasing their interconnectedness and logical coherence if any from text with formal word included "  + str('""" ') + str(input_text) + str(' """')
 
-        prompt_template = f'''
+        prompt_template=f'''
 
         USER: {prompt}
 
         ASSISTANT: Write an impressive newsletter with Retrospectives and Prospectives finds for mentioned product. Please say Not Applicable if you are not confident or honest about outcome:
         '''
-        
-        output_text= query({
-            "inputs": prompt_template,
-        })
+        response=generate_text(prompt_template)
+        output_text = response[0]["generated_text"]
 
         # Get the input text from the user
         st.title("Generated Outcome")
         st.write(output_text)
-        
+
         st.title("Visuals Generation for Marketing Compaign")
+        use_refiner = False
+        pipe = DiffusionPipeline.from_pretrained(
+          "stabilityai/stable-diffusion-xl-base-1.0",
+          torch_dtype=torch.float16,
+          use_safetensors=True,
+          variant="fp16",
+          )
+
+        if use_refiner:
+          refiner = DiffusionPipeline.from_pretrained(
+              "stabilityai/stable-diffusion-xl-refiner-1.0",
+              text_encoder_2=pipe.text_encoder_2,
+              vae=pipe.vae,
+              torch_dtype=torch.float16,
+              use_safetensors=True,
+              variant="fp16",
+          )
+
+          refiner = refiner.to("cuda")
+
+          pipe.enable_model_cpu_offload()
+        else:
+          pipe = pipe.to("cuda")
+
 
         # Get the input text from the user
         input_text = st.text_input("Enter the prompt/instruction for the Visuals:")
+        seed = random.randint(0, sys.maxsize)
+
+        images = pipe(
+            prompt = input_text,
+            output_type = "latent" if use_refiner else "pil",
+            generator = torch.Generator("cuda").manual_seed(seed),
+            ).images
+
+        if use_refiner:
+          images = refiner(
+              prompt = input_text,
+              image = images,
+              ).images
+
+        print(f"Prompt:\t{input_text}\nSeed:\t{seed}")
+        media.show_images(images)
+        images[0].save("/content/output.jpg")
+        image = Image.open('/content/output.jpg')
+
+        st.image(image, caption='Sunrise by the mountains')
 
 
     def page3(uploaded_file = uploaded_file):
@@ -324,7 +421,7 @@ if uploaded_file is not None:
         # 'Page Selection',
         # (range(0,len(doc))))
         col1.markdown("<h4 style='text-align: center; color: grey;'> Hypothesis: Larger the Fonts, Important the message </h4>", unsafe_allow_html=True)
-        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf") 
+        doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
         mnbb = []
         for p in range(0,len(doc)):
             page = doc[p]
@@ -342,7 +439,7 @@ if uploaded_file is not None:
 
                         mm = pd.DataFrame(list(res.keys()), columns = ['Key Text Attribute'])
                         mm['Text Attribute Value'] = list(res.values())
-                        
+
 
 
                         mmm = mm.T
@@ -355,12 +452,12 @@ if uploaded_file is not None:
                 except:
                     pass
         dg = pd.concat(mnbb).reset_index(drop=True)
-        
+
         #dg = pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
         font_dg = pd.DataFrame(dg[['page','font','size']].value_counts()).reset_index().sort_values('size',ascending=False).reset_index(drop=True)
         #font_dg = font_dg[font_dg['page']==page_option]
         col1.dataframe(font_dg)
-        
+
         fontt = font_dg['font'][:10].to_list()
         print(fontt)
         col1.markdown("<h4 style='text-align: center; color: grey;'> All text/messages subject to their font Size/Type </h4>", unsafe_allow_html=True)
@@ -382,7 +479,7 @@ if uploaded_file is not None:
         st.markdown("<h3 style='text-align: center; color: grey;'> Semantic Search within Document </h3>", unsafe_allow_html=True)
         st.sidebar.markdown("## Semantic Search ")
 
-       
+
         # read hotel reviews dataframe
 
         data=pd.read_csv(os.path.join(os.getcwd(),'test_breast_file_csv_updated_3.csv'))
@@ -431,7 +528,7 @@ if uploaded_file is not None:
             top_n = np.argpartition(bm25_scores, -5)[-5:]
             bm25_hits = [{'corpus_id': idx, 'score': bm25_scores[idx]} for idx in top_n]
             bm25_hits = sorted(bm25_hits, key=lambda x: x['score'], reverse=True)
-            
+
             print("Top-3 lexical search (BM25) hits")
             for hit in bm25_hits[0:3]:
                 print("\t{:.3f}\t{}".format(hit['score'], passages[hit['corpus_id']].replace("\n", " ")))
@@ -475,19 +572,19 @@ if uploaded_file is not None:
         bm_bis = pd.DataFrame(results[0])
         bm_bis = bm_bis.sort_values('score',ascending=False)
         bm_bis['text'] = bm_bis['corpus_id'].apply(lambda m :passages[m])
-      
+
 
         bm_co = pd.DataFrame(results[0])
         bm_co = bm_co.sort_values('cross-score',ascending=False)
         bm_co['text'] = bm_co['corpus_id'].apply(lambda m :passages[m])
-   
+
         st.markdown('lexical search (BM25) hits')
         st.dataframe(bm[['score','text']])
         st.markdown('Bi-Encoder Retrieval hits')
         st.dataframe(bm_bis[['score','text']][:10])
         st.markdown('Cross-Encoder Re-ranker hits')
         st.dataframe(bm_co[['cross-score','text']][:10])
-            
+
 
 
 
@@ -501,9 +598,9 @@ if uploaded_file is not None:
         #     'Chain Type',
         #     (['stuff', 'map_reduce', "refine", "map_rerank"]))
 
-            
+
         #     question_asked = st.text_area('Input your query','')
-            
+
         #     question_asked_predefined = st.sidebar.selectbox(
         #     'Pre-Defined Queries',
         #     (['identify all concepts discussed around quality of life', 'identify all concepts discussed aboutr efficacy']))
@@ -523,18 +620,18 @@ if uploaded_file is not None:
         #         db = Chroma.from_documents(texts, embeddings)
         #         # expose this index in a retriever interface
         #         retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": k})
-        #         # create a chain to answer questions 
+        #         # create a chain to answer questions
         #         qa = RetrievalQA.from_chain_type(
         #             llm=OpenAI(), chain_type=chain_type, retriever=retriever, return_source_documents=True)
         #         result = qa({"query": query})
         #         print(result['result'])
-        #         return result  
+        #         return result
         #     #convos = []  # store all panel objects in a list
 
         #     def qa_result(_):
         #         os.environ["OPENAI_API_KEY"] = open_ai_key.value
-                
-        #         # save pdf file to a temp file 
+
+        #         # save pdf file to a temp file
         #         if uploaded_file.value is not None:
         #             uploaded_file.save("/.cache/temp.pdf")
         #             try:
@@ -543,9 +640,9 @@ if uploaded_file is not None:
         #                 prompt_text = question_asked_predefined.value
 
         #             if prompt_text:
-        #                 result = qa(file=uploaded_file, query=prompt_text, chain_type=chain_type.value, k=relevant_chunks.value) 
+        #                 result = qa(file=uploaded_file, query=prompt_text, chain_type=chain_type.value, k=relevant_chunks.value)
         #         return result
-            
+
         #     if open_ai_key is not None:
         #         temp = qa_result
 
