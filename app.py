@@ -11,7 +11,7 @@ import random
 import sys
 import torch
 
-from diffusers import DiffusionPipeline
+#from diffusers import DiffusionPipeline
 import pandas as pd
 import ast
 from torch import cuda, bfloat16
