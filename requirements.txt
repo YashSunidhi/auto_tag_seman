@@ -24,3 +24,6 @@ xformers
 bitsandbytes 
 faiss-gpu 
 pypdf
+diffusers
+invisible_watermark 
+mediapy
