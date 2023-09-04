@@ -385,7 +385,7 @@ if uploaded_file is not None:
         
         #col1.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding Based on Fonts Size (Larger the Fonts Important the message) </h3>", unsafe_allow_html=True)
 
-        col2.markdown("<h4 style='text-align: center; color: grey;'> Extract Concepts for Highest font size/Type from NLP Based Pipeline (QA,GEN AI, Taxonomy) </h4>", unsafe_allow_html=True)
+        col2.markdown("<h4 style='text-align: center; color: grey;'> Proposed Tags/ Concept for Document </h4>", unsafe_allow_html=True)
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab.csv'))
         print(uploaded_file.name)
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
