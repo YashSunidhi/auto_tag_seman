@@ -632,7 +632,7 @@ if uploaded_file is not None:
     page_names_to_funcs = {
         "Intelligent Data Parsing": main_page,
         "Contextual Tags (Based on Hypothesis)": page3,
-        "Full Document Summary (Image and Text)": page5,
+        #"Full Document Summary (Image and Text)": page5,
         "Content Generation" : page6,
         #"Non - Contextual Tags, Iterate over pages": page2,
         #"Search across Document": page4,
