@@ -50,21 +50,21 @@ import os
 # import numpy as np
 
 # import streamlit as st
-# from helpers import (
-#     upload_pdf_file, 
-#     create_space, 
-#     image_extraction_component, 
-#     get_pdf_from_link, 
-#     return_pdf_data, 
-#     text_summary_component,
-#     set_session_state_key,
-#     sidebar_widget,
-#     get_text_data_from_pdf,
-#     load_state,
-#     load_pdf_report_summary
-# )
+from helpers import (
+    upload_pdf_file, 
+    create_space, 
+    image_extraction_component, 
+    get_pdf_from_link, 
+    return_pdf_data, 
+    text_summary_component,
+    set_session_state_key,
+    sidebar_widget,
+    get_text_data_from_pdf,
+    load_state,
+    load_pdf_report_summary
+)
 
-# from config import PDF_DATA_KEY, TEXT_DATA_KEY
+from config import PDF_DATA_KEY, TEXT_DATA_KEY
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'> ContentSculpt </h1>", unsafe_allow_html=True)
