@@ -9,60 +9,62 @@ import re
 
 import pandas as pd
 import ast
-from torch import cuda, bfloat16
-import transformers
-import torch
-from transformers import StoppingCriteria, StoppingCriteriaList
-from langchain.llms import HuggingFacePipeline
-from langchain.document_loaders import PyPDFDirectoryLoader
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-
-import os 
-from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
-from langchain.document_loaders import TextLoader
-from langchain.document_loaders import PyPDFLoader
-from langchain.indexes import VectorstoreIndexCreator
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-import tempfile
-import numpy as np
-import torch
-import os
-import pandas as pd
-from sentence_transformers import SentenceTransformer
-import faiss
-import time
-import json
-from sentence_transformers import SentenceTransformer, CrossEncoder, util
 import gzip
 import os
-import torch
-from rank_bm25 import BM25Okapi
-from sklearn.feature_extraction import _stop_words
-import string
-from tqdm.autonotebook import tqdm
-import numpy as np
+# from torch import cuda, bfloat16
+# import transformers
+# import torch
+# from transformers import StoppingCriteria, StoppingCriteriaList
+# from langchain.llms import HuggingFacePipeline
+# from langchain.document_loaders import PyPDFDirectoryLoader
+# from langchain.embeddings import HuggingFaceEmbeddings
+# from langchain.vectorstores import FAISS
+# from langchain.chains import ConversationalRetrievalChain
 
-import streamlit as st
-from helpers import (
-    upload_pdf_file, 
-    create_space, 
-    image_extraction_component, 
-    get_pdf_from_link, 
-    return_pdf_data, 
-    text_summary_component,
-    set_session_state_key,
-    sidebar_widget,
-    get_text_data_from_pdf,
-    load_state,
-    load_pdf_report_summary
-)
+# import os 
+# from langchain.chains import RetrievalQA
+# from langchain.llms import OpenAI
+# from langchain.document_loaders import TextLoader
+# from langchain.document_loaders import PyPDFLoader
+# from langchain.indexes import VectorstoreIndexCreator
+# from langchain.text_splitter import CharacterTextSplitter
+# from langchain.embeddings import OpenAIEmbeddings
+# from langchain.vectorstores import Chroma
+# import tempfile
+# import numpy as np
+# import torch
+# import os
+# import pandas as pd
+# from sentence_transformers import SentenceTransformer
+# import faiss
+# import time
+# import json
+# from sentence_transformers import SentenceTransformer, CrossEncoder, util
+# import gzip
+# import os
+# import torch
+# from rank_bm25 import BM25Okapi
+# from sklearn.feature_extraction import _stop_words
+# import string
+# from tqdm.autonotebook import tqdm
+# import numpy as np
 
-from config import PDF_DATA_KEY, TEXT_DATA_KEY
+# import streamlit as st
+# from helpers import (
+#     upload_pdf_file, 
+#     create_space, 
+#     image_extraction_component, 
+#     get_pdf_from_link, 
+#     return_pdf_data, 
+#     text_summary_component,
+#     set_session_state_key,
+#     sidebar_widget,
+#     get_text_data_from_pdf,
+#     load_state,
+#     load_pdf_report_summary
+# )
+
+# from config import PDF_DATA_KEY, TEXT_DATA_KEY
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'> ContentSculpt </h1>", unsafe_allow_html=True)
