@@ -701,7 +701,7 @@ if uploaded_file is not None:
         
         
         ### Data Loadinga and Embedding
-        loader = PyPDFDirectoryLoader("/content/example_data/")
+        loader = PyPDFDirectoryLoader("data/")
         documents = loader.load()
         
         from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -747,6 +747,7 @@ if uploaded_file is not None:
         "Content Generation" : page6,
         #"Non - Contextual Tags, Iterate over pages": page2,
         #"Search across Document": page4,
+        "Query Based Evidence Generation": page8,
     }
 
     selected_page = st.sidebar.selectbox("# Analysis Selection", page_names_to_funcs.keys())
