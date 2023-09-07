@@ -11,6 +11,15 @@ import pandas as pd
 import ast
 import gzip
 import os
+from torch import cuda, bfloat16
+import transformers
+import torch
+from transformers import StoppingCriteria, StoppingCriteriaList
+from langchain.llms import HuggingFacePipeline
+from langchain.document_loaders import PyPDFDirectoryLoader
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import ConversationalRetrievalChain
 # from torch import cuda, bfloat16
 # import transformers
 # import torch
