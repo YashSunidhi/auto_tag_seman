@@ -739,7 +739,7 @@ if uploaded_file is not None:
         "Content Generation" : page6,
         #"Non - Contextual Tags, Iterate over pages": page2,
         #"Search across Document": page4,
-        "Query Based Evidence Generation": page8,
+        #"Query Based Evidence Generation": page8,
     }
 
     selected_page = st.sidebar.selectbox("# Analysis Selection", page_names_to_funcs.keys())
