@@ -292,13 +292,13 @@ if uploaded_file is not None:
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
-            output_text = st.write(dg_g['Email'][0])
+            output_text = st.write(dg_g['Email Based on Summary'][0])
             
         elif uploaded_file.name == 'test_breast_file.pdf':
-            output_text = st.write(dg_g['Email'][1])
+            output_text = st.write(dg_g['Email Based on Summary'][1])
            
         elif uploaded_file.name == 'APAC DAN Lung PPoC Insight WP (last updated 2023.08.08).pdf':
-            output_text = st.write(dg_g['Email'][2])
+            output_text = st.write(dg_g['Email Based on Summary'][2])
             
         # begin initializing HF items, you need an access token
         # import requests
