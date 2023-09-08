@@ -290,7 +290,7 @@ if uploaded_file is not None:
         # Get the input text from the user
         st.title("Marketing Compaign Email Generator")
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
-        dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab.csv'))
+        dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
             output_text = st.write(dg_g['Email'][0])
             
@@ -397,7 +397,7 @@ if uploaded_file is not None:
         #col1.markdown("<h3 style='text-align: center; color: grey;'> Document Understanding Based on Fonts Size (Larger the Fonts Important the message) </h3>", unsafe_allow_html=True)
 
         col2.markdown("<h4 style='text-align: center; color: grey;'> Proposed Tags/ Concept for Document </h4>", unsafe_allow_html=True)
-        dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab.csv'))
+        dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         print(uploaded_file.name)
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
             col2.write(dg_g['Tags'][0])
