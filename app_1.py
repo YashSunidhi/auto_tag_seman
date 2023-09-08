@@ -20,6 +20,8 @@ from langchain.document_loaders import PyPDFDirectoryLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
+from transformers import AutoTokenizer, pipeline, logging
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
 # from torch import cuda, bfloat16
 # import transformers
 # import torch
