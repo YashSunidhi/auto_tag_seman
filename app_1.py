@@ -400,15 +400,15 @@ if uploaded_file is not None:
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         print(uploaded_file.name)
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
-            col2.write(dg_g['Tags'][0])
+            col2.write(ast.literal_eval(dg_g['Tags'][0]))
             col2.markdown("<h4 style='text-align: center; color: grey;'> Short Summary based on NLP Model </h4>", unsafe_allow_html=True)
             col2.write(dg_g['Summary'][0])
         elif uploaded_file.name == 'test_breast_file.pdf':
-            col2.write(dg_g['Tags'][1])
+            col2.write(ast.literal_eval(dg_g['Tags'][1]))
             col2.markdown("<h4 style='text-align: center; color: grey;'> Short Summary based on NLP Model </h4>", unsafe_allow_html=True)
             col2.write(dg_g['Summary'][1])
         elif uploaded_file.name == 'APAC DAN Lung PPoC Insight WP (last updated 2023.08.08).pdf':
-            col2.write(dg_g['Tags'][2])
+            col2.write(ast.literal_eval(dg_g['Tags'][2]))
             col2.markdown("<h4 style='text-align: center; color: grey;'> Short Summary based on NLP Model </h4>", unsafe_allow_html=True)
             col2.write(dg_g['Summary'][2])
     def page4():
