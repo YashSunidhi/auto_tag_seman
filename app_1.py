@@ -641,72 +641,53 @@ if uploaded_file is not None:
             "---"
     def page8():
         ### Query Based evidence identification:
-        # define custom stopping criteria object
-        class StopOnTokens(StoppingCriteria):
-            def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
-                for stop_ids in stop_token_ids:
-                    if torch.eq(input_ids[0][-len(stop_ids):], stop_ids).all():
-                        return True
-                return False
+        model_name_or_path = "TheBloke/WizardLM-13B-V1.2-GPTQ"
+        #model_basename = "wizardlm-13b-v1.1-GPTQ-4bit-128g.no-act.order"
         
-        stopping_criteria = StoppingCriteriaList([StopOnTokens()])
+        use_triton = False
         
-        ### Model Loading
-        model_id = 'meta-llama/Llama-2-13b-chat-hf'
-        #model_id = "conceptofmind/Yarn-Llama-2-13b-128k"
+        tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
         
-        device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
+        model = AutoGPTQForCausalLM.from_quantized(model_name_or_path,
+                                                   #model_basename = model_basename,
+                                                   use_safetensors=True,
+                                                   trust_remote_code=True,
+                                                   device="cuda:0",
+                                                   use_triton=use_triton,
+                                                   quantize_config=None)
         
-        # set quantization configuration to load large model with less GPU memory
-        # this requires the `bitsandbytes` library
-        bnb_config = transformers.BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type='nf4',
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=bfloat16
-        )
         
-        # begin initializing HF items, you need an access token
-        hf_auth = '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'
-        model_config = transformers.AutoConfig.from_pretrained(
-            model_id,
-            use_auth_token=hf_auth
-        )
+        prompt = "Tell me about AI"
+        prompt_template=f'''A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.
         
-        model = transformers.AutoModelForCausalLM.from_pretrained(
-            model_id,
-            trust_remote_code=True,
-            config=model_config,
-            quantization_config=bnb_config,
-            device_map='auto',
-            use_auth_token=hf_auth
-        )
+        USER: {prompt}
+        ASSISTANT:
         
-        # enable evaluation mode to allow model inference
-        model.eval()
+        '''
         
-        tokenizer = transformers.AutoTokenizer.from_pretrained(
-            model_id,
-            use_auth_token=hf_auth
-        )
+        print("\n\n*** Generate:")
         
-        stop_list = ['\nHuman:', '\n```\n']
-        stop_token_ids = [tokenizer(x)['input_ids'] for x in stop_list]
-        stop_token_ids = [torch.LongTensor(x).to(device) for x in stop_token_ids]
+        input_ids = tokenizer(prompt_template, return_tensors='pt').input_ids.cuda()
+        output = model.generate(inputs=input_ids, temperature=0.7, max_new_tokens=512)
+        print(tokenizer.decode(output[0]))
         
-        generate_text = transformers.pipeline(
+        # Inference can also be done using transformers' pipeline
+        
+        # Prevent printing spurious transformers error when using pipeline with AutoGPTQ
+        logging.set_verbosity(logging.CRITICAL)
+        
+        print("*** Pipeline:")
+        pipe = pipeline(
+            "text-generation",
             model=model,
             tokenizer=tokenizer,
-            return_full_text=True,  # langchain expects the full text
-            task='text-generation',
-            # we pass model parameters here too
-            stopping_criteria=stopping_criteria,  # without this model rambles during chat
-            temperature=0.1,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
-            max_new_tokens=512,  # max number of tokens to generate in the output
-            repetition_penalty=1.1  # without this output begins repeating
+            max_new_tokens=512,
+            temperature=0.7,
+            top_p=0.95,
+            repetition_penalty=1.15
         )
         
-        llm = HuggingFacePipeline(pipeline=generate_text)
+        llm = HuggingFacePipeline(pipeline=pipe)
         
         
         ### Data Loadinga and Embedding
