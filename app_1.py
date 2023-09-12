@@ -642,94 +642,112 @@ if uploaded_file is not None:
             create_space(1)
             "---"
     def page8():
-        ### Query Based evidence identification:
-        model_name_or_path = "TheBloke/WizardLM-13B-V1.2-GPTQ"
-        #model_basename = "wizardlm-13b-v1.1-GPTQ-4bit-128g.no-act.order"
-        
-        use_triton = False
-        
-        tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
-        
-        model = AutoGPTQForCausalLM.from_quantized(model_name_or_path,
-                                                   #model_basename = model_basename,
-                                                   use_safetensors=True,
-                                                   trust_remote_code=True,
-                                                   device="cuda:0",
-                                                   use_triton=use_triton,
-                                                   quantize_config=None)
-        
-        
-        prompt = "Tell me about AI"
-        prompt_template=f'''A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.
-        
-        USER: {prompt}
-        ASSISTANT:
-        
-        '''
-        
-        print("\n\n*** Generate:")
-        
-        input_ids = tokenizer(prompt_template, return_tensors='pt').input_ids.cuda()
-        output = model.generate(inputs=input_ids, temperature=0.7, max_new_tokens=512)
-        print(tokenizer.decode(output[0]))
-        
-        # Inference can also be done using transformers' pipeline
-        
-        # Prevent printing spurious transformers error when using pipeline with AutoGPTQ
-        logging.set_verbosity(logging.CRITICAL)
-        
-        print("*** Pipeline:")
-        pipe = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            max_new_tokens=512,
-            temperature=0.7,
-            top_p=0.95,
-            repetition_penalty=1.15
-        )
-        
-        llm = HuggingFacePipeline(pipeline=pipe)
-        
-        
-        ### Data Loadinga and Embedding
-        loader = PyPDFDirectoryLoader("data/")
-        documents = loader.load()
-        
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-        
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
-        all_splits = text_splitter.split_documents(documents)
-        
-        
-        model_name = "sentence-transformers/all-mpnet-base-v2"
-        model_kwargs = {"device": "cuda"}
-        embeddings = HuggingFaceEmbeddings(model_name=model_name, model_kwargs=model_kwargs)
-        # storing embeddings in the vector store
-        vectorstore = FAISS.from_documents(all_splits, embeddings)
-        
-        ### Chain of discussion
-        chain = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
-        
-        chat_history = []
-        # Create centered main title
-        st.markdown("<h3 style='text-align: center; color: grey;'> 🦙 Content Query Builder to extract Evidence </h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center; color: grey;'> 🦙 Content Generation for Marketing Content </h3>", unsafe_allow_html=True)
         st.title('🦙 Content Query Builder')
-        # Create a text input box for the user
+        option1 = st.sidebar.selectbox(
+        'Content Type',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+        option2 = st.sidebar.selectbox(
+        'Tone Type',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+
+        option2 = st.sidebar.selectbox(
+        'Disease Area',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
         prompt = st.text_input('Input your prompt here')
+        st.write(result['source_documents'])
         
-        # If the user hits enter
-        if prompt:
-            response = chain({"question": prompt, "chat_history": chat_history})
-            # ...and write it out to the screen
-            st.write(response['answer'])
+        # ### Query Based evidence identification:
+        # model_name_or_path = "TheBloke/WizardLM-13B-V1.2-GPTQ"
+        # #model_basename = "wizardlm-13b-v1.1-GPTQ-4bit-128g.no-act.order"
         
-            # Display raw response object
-            with st.expander('Response Object'):
-                st.write(response['answer'])
-            # Display source text
-            with st.expander('Source Text'):
-                st.write(result['source_documents'])
+        # use_triton = False
+        
+        # tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, use_fast=True)
+        
+        # model = AutoGPTQForCausalLM.from_quantized(model_name_or_path,
+        #                                            #model_basename = model_basename,
+        #                                            use_safetensors=True,
+        #                                            trust_remote_code=True,
+        #                                            device="cuda:0",
+        #                                            use_triton=use_triton,
+        #                                            quantize_config=None)
+        
+        
+        # prompt = "Tell me about AI"
+        # prompt_template=f'''A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.
+        
+        # USER: {prompt}
+        # ASSISTANT:
+        
+        # '''
+        
+        # print("\n\n*** Generate:")
+        
+        # input_ids = tokenizer(prompt_template, return_tensors='pt').input_ids.cuda()
+        # output = model.generate(inputs=input_ids, temperature=0.7, max_new_tokens=512)
+        # print(tokenizer.decode(output[0]))
+        
+        # # Inference can also be done using transformers' pipeline
+        
+        # # Prevent printing spurious transformers error when using pipeline with AutoGPTQ
+        # logging.set_verbosity(logging.CRITICAL)
+        
+        # print("*** Pipeline:")
+        # pipe = pipeline(
+        #     "text-generation",
+        #     model=model,
+        #     tokenizer=tokenizer,
+        #     max_new_tokens=512,
+        #     temperature=0.7,
+        #     top_p=0.95,
+        #     repetition_penalty=1.15
+        # )
+        
+        # llm = HuggingFacePipeline(pipeline=pipe)
+        
+        
+        # ### Data Loadinga and Embedding
+        # loader = PyPDFDirectoryLoader("data/")
+        # documents = loader.load()
+        
+        # from langchain.text_splitter import RecursiveCharacterTextSplitter
+        
+        # text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
+        # all_splits = text_splitter.split_documents(documents)
+        
+        
+        # model_name = "sentence-transformers/all-mpnet-base-v2"
+        # model_kwargs = {"device": "cuda"}
+        # embeddings = HuggingFaceEmbeddings(model_name=model_name, model_kwargs=model_kwargs)
+        # # storing embeddings in the vector store
+        # vectorstore = FAISS.from_documents(all_splits, embeddings)
+        
+        # ### Chain of discussion
+        # chain = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
+        
+        # chat_history = []
+        # # Create centered main title
+        # st.markdown("<h3 style='text-align: center; color: grey;'> 🦙 Content Query Builder to extract Evidence </h3>", unsafe_allow_html=True)
+        # st.title('🦙 Content Query Builder')
+        # # Create a text input box for the user
+        # prompt = st.text_input('Input your prompt here')
+        
+        # # If the user hits enter
+        # if prompt:
+        #     response = chain({"question": prompt, "chat_history": chat_history})
+        #     # ...and write it out to the screen
+        #     st.write(response['answer'])
+        
+        #     # Display raw response object
+        #     with st.expander('Response Object'):
+        #         st.write(response['answer'])
+        #     # Display source text
+        #     with st.expander('Source Text'):
+        #         st.write(result['source_documents'])
 
     
     page_names_to_funcs = {
