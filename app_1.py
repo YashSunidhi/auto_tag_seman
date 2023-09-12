@@ -305,7 +305,7 @@ if uploaded_file is not None:
         ('blocks','page', 'lines', 'size', 
             'flags'))
         prompt = st.text_input('Input your prompt here')
-        st.write(result['source_documents'])
+        st.write()
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
