@@ -300,10 +300,25 @@ if uploaded_file is not None:
         ('blocks','page', 'lines', 'size', 
             'flags'))
 
-        option2 = st.sidebar.selectbox(
+        option3 = st.sidebar.selectbox(
         'Disease Area',
         ('blocks','page', 'lines', 'size', 
             'flags'))
+
+        option4 = st.sidebar.selectbox(
+        'Objective',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+        option5 = st.sidebar.selectbox(
+        'Channel Type',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+
+        option6 = st.sidebar.selectbox(
+        'Target Auidience',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+        
         prompt = st.text_input('Input your prompt here')
         st.write()
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
