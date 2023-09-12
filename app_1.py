@@ -291,6 +291,21 @@ if uploaded_file is not None:
         #######
         # Get the input text from the user
         st.title("Marketing Compaign Email Generator")
+        option1 = st.sidebar.selectbox(
+        'Content Type',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+        option2 = st.sidebar.selectbox(
+        'Tone Type',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+
+        option2 = st.sidebar.selectbox(
+        'Disease Area',
+        ('blocks','page', 'lines', 'size', 
+            'flags'))
+        prompt = st.text_input('Input your prompt here')
+        st.write(result['source_documents'])
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
