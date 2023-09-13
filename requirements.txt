@@ -14,3 +14,4 @@ faiss-gpu
 sentence_transformers 
 pypdf
 auto_gptq
+replicate
