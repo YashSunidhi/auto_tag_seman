@@ -333,7 +333,7 @@ if uploaded_file is not None:
         else:
             st.text(prompt)
 
-        st.download_button(label="Download data as docx", data=prompt, file_name='output.txt', mime='txt')
+        st.download_button(label="Download data as docx", data=prompt, file_name='output.docx', mime='docx')
         st.success('Text Extraction Completed!')
 
         extract_button = st.button("Extract text")
