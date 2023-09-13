@@ -385,7 +385,7 @@ if uploaded_file is not None:
             output=replicate.run(llm, input={"prompt": f"{default_system_prompt} {prompt_input} Assistant: ",
                                              "temperature": temperature, "top_p":top_p, "max_length": max_length, "repititon_penalty":1.15})
         
-            return output[0]['generated_text']
+            return output
         
         
         #User -Provided Prompt
