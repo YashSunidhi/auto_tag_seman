@@ -6,7 +6,7 @@ import base64
 from pathlib import Path
 from PIL import Image
 import re
-
+import replicate
 import pandas as pd
 import ast
 import gzip
