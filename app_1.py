@@ -320,7 +320,7 @@ if uploaded_file is not None:
         'Target Audience Expectation',
         ('Alternative Treatment', 'Ease of Access', 'Higher Safety', 'Higher Efficacy', 'Quality of life', 'Lower Price'))
         option7 = st.text_input('Input your prompt here',"Write an executive short email for internal purposes based on document summary?")
-        default_prompt = ["Create persuasive marketing content in " + option6 + " for " + option2+ ", emphasizing the " +option3+ " tone. Craft a "+ option 4+ " that educates them about " + option1 +" role in cancer treatment and its potential benefits. The objective is to " + option5 + " to those seeking "+ option8+" options. The user-defined query is " + option 7]
+        default_prompt = ["Create persuasive marketing content in " + option6 + " for " + option2+ ", emphasizing the " +option3+ " tone. Craft a "+ option4+ " that educates them about " + option1 +" role in cancer treatment and its potential benefits. The objective is to " + option5 + " to those seeking "+ option8+" options. The user-defined query is " + option7]
         #prompt = st.text_input('Input your prompt here')
         prompt = st.write(default_prompt[0)
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
