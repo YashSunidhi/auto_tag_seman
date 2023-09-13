@@ -293,7 +293,7 @@ if uploaded_file is not None:
         st.title("Marketing Content  Generator")
         option1 = st.sidebar.selectbox(
         'Product',
-        ('Phesgo, Tecentriq'))
+        ('Phesgo', 'Tecentriq'))
         option2 = st.sidebar.selectbox(
         'Target Audience',
         ('HCP', 'Patients', 'Patients and their Families'))
