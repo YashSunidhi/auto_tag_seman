@@ -351,7 +351,7 @@ if uploaded_file is not None:
             top_p=st.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
             max_length=st.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
         
-            st.markdown('I make content on AI on regular basis do check my Youtube channel [link](https://www.youtube.com/@muhammadmoinfaisal/videos)')
+            #st.markdown('I make content on AI on regular basis do check my Youtube channel [link](https://www.youtube.com/@muhammadmoinfaisal/videos)')
         
         os.environ['REPLICATE_API_TOKEN']=add_replicate_api
         
@@ -383,7 +383,7 @@ if uploaded_file is not None:
                 else:
                     default_system_prompt+="Assistant" + data["content"] + "\n\n"
             output=replicate.run(llm, input={"prompt": f"{default_system_prompt} {prompt_input} Assistant: ",
-                                             "temperature": temperature, "top_p":top_p, "max_length": max_length, "repititon_penalty":1})
+                                             "temperature": temperature, "top_p":top_p, "max_length": max_length, "repititon_penalty":1.15})
         
             return output
         
