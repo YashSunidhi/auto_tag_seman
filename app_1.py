@@ -335,6 +335,19 @@ if uploaded_file is not None:
 
         st.download_button(label="Download data as docx", data=prompt, file_name='output.txt', mime='txt')
         st.success('Text Extraction Completed!')
+
+        extract_button = st.button("Extract text")
+        if extract_button:
+            st.session_state["text"] = prompt
+        
+        if "text" in st.session_state:
+            st.text_area("Output is: ", key="text", height=220)
+            st.download_button(
+                label="Download data as docx",
+                data=st.session_state["text"],
+                file_name="output.docx",
+                mime="docx",
+            )
        
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         
