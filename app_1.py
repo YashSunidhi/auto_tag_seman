@@ -290,38 +290,41 @@ if uploaded_file is not None:
         st.markdown("<h3 style='text-align: center; color: grey;'> Instruction Based Promotional Content Generation </h3>", unsafe_allow_html=True)
         #######
         # Get the input text from the user
-        st.title("Marketing Compaign Email Generator")
+        st.title("Marketing Content  Generator")
         option1 = st.sidebar.selectbox(
-        'Content Type',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
+        'Product',
+        ('Phesgo, Tecentriq'))
         option2 = st.sidebar.selectbox(
-        'Tone Type',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
+        'Target Audience',
+        ('HCP', 'Patients', 'Patients and their Families'))
 
         option3 = st.sidebar.selectbox(
-        'Disease Area',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
+        'Tone of Generation',
+        ('Professional','Empathetic', 'Informative', 'Patient-centered','Ethical, 'Engaging','Trustworthy', 'Compassionate and Reassuring'
+        ))
 
         option4 = st.sidebar.selectbox(
-        'Objective',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
+        'Content Type',
+        ('None','Newsletter','Email', 'Executive', 'Regular Content','Blog Post' 
+            ))
         option5 = st.sidebar.selectbox(
-        'Channel Type',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
+        'Objective',
+        ('Increase User Engagement','Generate Interest', 'Share Product Update', 'Increase Product Adoption', ' Provide Hope and Information'
+            ))
 
         option6 = st.sidebar.selectbox(
-        'Target Auidience',
-        ('blocks','page', 'lines', 'size', 
-            'flags'))
-        
-        prompt = st.text_input('Input your prompt here')
-        st.write()
+        'Output Language',
+        ('English','French', 'Spanish', 'German', 
+            'Italian'))
+        option8 = st.sidebar.selectbox(
+        'Target Audience Expectation',
+        ('Alternative Treatment', 'Ease of Access', 'Higher Safety', 'Higher Efficacy', 'Quality of life', 'Lower Price'))
+        option7 = st.text_input('Input your prompt here',"Write an executive short email for internal purposes based on document summary?")
+        default_prompt = ["Create persuasive marketing content in " option6 " for " + option2 ", emphasizing the " +option3+ " tone. Craft a "+ option 4+ " that educates them about " + option1 +" role in cancer treatment and its potential benefits. The objective is to " + option5 + " to those seeking "+ option8+" options. The user-defined query is " + option 7]
+        #prompt = st.text_input('Input your prompt here')
+        prompt = st.write(default_prompt[0)
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
+        
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
         if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
             output_text = st.write(dg_g['Email Based on Summary'][0])
