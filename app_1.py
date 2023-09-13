@@ -323,6 +323,13 @@ if uploaded_file is not None:
         default_prompt = ["Create persuasive marketing content in " + option6 + " for " + option2+ ", emphasizing the " +option3+ " tone. Craft a "+ option4+ " that educates them about " + option1 +" role in cancer treatment and its potential benefits. The objective is to " + option5 + " to those seeking "+ option8+" options. The user-defined query is " + option7]
         #prompt = st.text_input('Input your prompt here')
         prompt = st.write(default_prompt[0])
+        allow_editing = st.radio("Edit parsed data", [True, False])
+
+        if allow_editing:
+            output = st.text_area("parsed data", value=prompt)
+        else:
+            st.text(prompt)
+       
         input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         
         dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
