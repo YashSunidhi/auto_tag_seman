@@ -328,7 +328,7 @@ if uploaded_file is not None:
         prompt = st.write(default_prompt[0])
         #Create a Side bar
         with st.sidebar:
-            st.title("🦙💬 Llama 2 Chatbot")
+            st.title("🦙💬 Interactive Content Generation Assistant")
             st.header("Settings")
         
             add_replicate_api=st.text_input('Enter the Replicate API token', type='password')
@@ -411,17 +411,17 @@ if uploaded_file is not None:
             message= {"role":"assistant", "content":full_response}
             st.session_state.messages.append(message)
        
-        input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
+        # input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         
-        dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
-        if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
-            output_text = st.write(dg_g['Email Based on Summary'][0])
+        # dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
+        # if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
+        #     output_text = st.write(dg_g['Email Based on Summary'][0])
             
-        elif uploaded_file.name == 'test_breast_file.pdf':
-            output_text = st.write(dg_g['Email Based on Summary'][1])
+        # elif uploaded_file.name == 'test_breast_file.pdf':
+        #     output_text = st.write(dg_g['Email Based on Summary'][1])
            
-        elif uploaded_file.name == 'APAC DAN Lung PPoC Insight WP (last updated 2023.08.08).pdf':
-            output_text = st.write(dg_g['Email Based on Summary'][2])
+        # elif uploaded_file.name == 'APAC DAN Lung PPoC Insight WP (last updated 2023.08.08).pdf':
+        #     output_text = st.write(dg_g['Email Based on Summary'][2])
             
         # begin initializing HF items, you need an access token
         # import requests
