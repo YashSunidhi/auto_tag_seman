@@ -300,7 +300,7 @@ if uploaded_file is not None:
 
         option3 = st.sidebar.selectbox(
         'Tone of Generation',
-        ('Professional','Empathetic', 'Informative', 'Patient-centered','Ethical, 'Engaging','Trustworthy', 'Compassionate and Reassuring'
+        ('Professional','Empathetic', 'Informative', 'Patient-centered','Ethical', 'Engaging','Trustworthy', 'Compassionate and Reassuring'
         ))
 
         option4 = st.sidebar.selectbox(
