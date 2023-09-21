@@ -430,18 +430,6 @@ if uploaded_file is not None:
 
             st.session_state.messages.append(message)
 
-            if "response" not in st.session_state:
-                st.session_state.response = ""
-            if "response1" not in st.session_state:
-                st.session_state.response1 = ""
-            if "response2" not in st.session_state:
-                st.session_state.response2 = ""
-            if "response3" not in st.session_state:
-                st.session_state.response3 = ""
-            if "feedback_key" not in st.session_state:
-                st.session_state.feedback_key = 0
-            if "logged_prompt" not in st.session_state:
-                st.session_state.logged_prompt = ""
             collector = FeedbackCollector(
                 project="llm_gen",
                 email='smnitrkl50@gmail.com',
@@ -458,9 +446,9 @@ if uploaded_file is not None:
             #     )
             #     st.session_state.response = response_text
             #     st.session_state.feedback_key += 1
-            st.session_state.response1 = response1
-            st.session_state.response2 = response2
-            st.session_state.response3 = response3
+            st.session_state.messages = response1
+            st.session_state.messages = response2
+            st.session_state.messages = response3
             if st.session_state.response1:
                 st.markdown(f"#### :violet[{st.session_state.response1}]")
                 collector.st_feedback(
