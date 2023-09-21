@@ -413,6 +413,9 @@ if uploaded_file is not None:
                     #response=generate_llama2_response(prompt)
                     placeholder=st.empty()
                     full_response=''
+                    response1 = ''
+                    response2 = ''
+                    response3 = ''
                     for item in (response1 or response2 or response3):
                         full_response+=item
                         placeholder.markdown(full_response)
