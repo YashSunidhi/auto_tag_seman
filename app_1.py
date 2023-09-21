@@ -401,11 +401,19 @@ if uploaded_file is not None:
         
         if st.session_state.messages[-1]["role"] != "assistant":
             with st.chat_message("assistant"):
+                dx = pd.read_csv('generate_outcome_Sheet1.csv')
                 with st.spinner("Thinking..."):
-                    response=generate_llama2_response(prompt)
+                    tab1, tab2, tab3 = st.tabs(["Generated Outcome 1","Generated Outcome 2","Generated Outcome 3"])
+                    with tab1:
+                        response1= tab1.write(dx['generation_1'])
+                    with tab2:
+                        response2=tab2.write(dx['generation_2'])
+                    with tab3:
+                        response3= tab3.write(dx['generation_3'])
+                    #response=generate_llama2_response(prompt)
                     placeholder=st.empty()
                     full_response=''
-                    for item in response:
+                    for item in [response1,response2,response3]:
                         full_response+=item
                         placeholder.markdown(full_response)
                     placeholder.markdown(full_response)
