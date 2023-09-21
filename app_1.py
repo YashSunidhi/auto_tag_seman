@@ -405,15 +405,15 @@ if uploaded_file is not None:
                 with st.spinner("Thinking..."):
                     tab1, tab2, tab3 = st.tabs(["Generated Outcome 1","Generated Outcome 2","Generated Outcome 3"])
                     with tab1:
-                        response1= tab1.write(dx['generation_1'])
+                        response1= tab1.write(dx['generation_1'][0])
                     with tab2:
-                        response2=tab2.write(dx['generation_2'])
+                        response2=tab2.write(dx['generation_2'][0])
                     with tab3:
-                        response3= tab3.write(dx['generation_3'])
+                        response3= tab3.write(dx['generation_3'][0])
                     #response=generate_llama2_response(prompt)
                     placeholder=st.empty()
                     full_response=''
-                    for item in [response1,response2,response3]:
+                    for item in ' '.join([response1,response2,response3]):
                         full_response+=item
                         placeholder.markdown(full_response)
                     placeholder.markdown(full_response)
