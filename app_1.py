@@ -427,16 +427,17 @@ if uploaded_file is not None:
             # collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="default")
             # from trubrics import Trubrics
 
-            trubrics = Trubrics(
+            collector = FeedbackCollector(
                 project="llm_gen",
                 email='smnitrkl50@gmail.com',
                 password='Ram@2107',
             )
 
-            user_feedback = trubrics.log_feedback(
+            user_feedback = collector.st_feedback(
                 component="default",
-                model="gpt-3.5-turbo",
-                user_response={'type': 'thumbs', 'score': '👎', 'text': 'a user comment'},
+                model="llama2_13b",
+                feedback_type="faces",
+                open_feedback_label="[Optional] Provide additional feedback",
                 prompt_id=prompt,  # see prompts to log prompts and model generations
             )
             
