@@ -423,7 +423,7 @@ if uploaded_file is not None:
         
             message= {"role":"assistant", "content":full_response}
 
-            collector = FeedbackCollector(email='smitrkl50@gmail.com', password='Ram@2107', project="llm_gen")
+            collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="llm_gen")
 
             user_feedback = collector.st_feedback(
                 component="default",
