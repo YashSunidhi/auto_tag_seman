@@ -449,7 +449,7 @@ if uploaded_file is not None:
             st.session_state.messages = response1
             st.session_state.messages = response2
             st.session_state.messages = response3
-            if st.session_state.response1:
+            if st.session_state.messages.response1:
                 st.markdown(f"#### :violet[{st.session_state.response1}]")
                 collector.st_feedback(
                     component="default1",
