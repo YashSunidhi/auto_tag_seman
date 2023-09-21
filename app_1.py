@@ -24,6 +24,7 @@ from transformers import AutoTokenizer, pipeline, logging
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from trubrics.integrations.streamlit import FeedbackCollector
+from trubrics import Trubrics
 
 # from torch import cuda, bfloat16
 # import transformers
@@ -423,14 +424,20 @@ if uploaded_file is not None:
         
             message= {"role":"assistant", "content":full_response}
 
-            collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="default")
+            # collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="default")
+            # from trubrics import Trubrics
 
-            user_feedback = collector.st_feedback(
+            trubrics = Trubrics(
+                project="llm_gen",
+                email='smnitrkl50@gmail.com',
+                password='Ram@2107',
+            )
+
+            user_feedback = trubrics.log_feedback(
                 component="default",
-                feedback_type="thumbs",
-                open_feedback_label="[Optional] Provide additional feedback",
-                model="llama_2_70b",
-                prompt_id=prompt,  # checkout collector.log_prompt() to log your user prompts
+                model="gpt-3.5-turbo",
+                user_response={'type': 'thumbs', 'score': '👎', 'text': 'a user comment'}
+                prompt_id=prompt,  # see prompts to log prompts and model generations
             )
             
             if user_feedback:
