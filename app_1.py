@@ -23,6 +23,8 @@ from langchain.chains import ConversationalRetrievalChain
 from transformers import AutoTokenizer, pipeline, logging
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from trubrics.integrations.streamlit import FeedbackCollector
+
 # from torch import cuda, bfloat16
 # import transformers
 # import torch
@@ -409,6 +411,20 @@ if uploaded_file is not None:
                     placeholder.markdown(full_response)
         
             message= {"role":"assistant", "content":full_response}
+
+            collector = FeedbackCollector(email='smitrkl50@gmail.com', password='Ram@2107', project="llm_gen")
+
+            user_feedback = collector.st_feedback(
+                component="default",
+                feedback_type="thumbs",
+                open_feedback_label="[Optional] Provide additional feedback",
+                model="llama_2_70b",
+                prompt_id=prompt,  # checkout collector.log_prompt() to log your user prompts
+            )
+            
+            if user_feedback:
+                st.write("#### Raw feedback saved to Trubrics:")
+                st.write(user_feedback)
             st.session_state.messages.append(message)
        
         # input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
