@@ -436,7 +436,7 @@ if uploaded_file is not None:
             user_feedback = trubrics.log_feedback(
                 component="default",
                 model="gpt-3.5-turbo",
-                user_response={'type': 'thumbs', 'score': '👎', 'text': 'a user comment'}
+                user_response={'type': 'thumbs', 'score': '👎', 'text': 'a user comment'},
                 prompt_id=prompt,  # see prompts to log prompts and model generations
             )
             
