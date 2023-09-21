@@ -427,6 +427,8 @@ if uploaded_file is not None:
             # collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="default")
             # from trubrics import Trubrics
 
+
+            st.session_state.messages.append(message)
             collector = FeedbackCollector(
                 project="llm_gen",
                 email='smnitrkl50@gmail.com',
@@ -440,11 +442,10 @@ if uploaded_file is not None:
                 open_feedback_label="[Optional] Provide additional feedback",
                 prompt_id=prompt,  # see prompts to log prompts and model generations
             )
-            
+        
             if user_feedback:
                 st.write("#### Raw feedback saved to Trubrics:")
                 st.write(user_feedback)
-            st.session_state.messages.append(message)
        
         # input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         
