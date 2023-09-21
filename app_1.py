@@ -426,23 +426,54 @@ if uploaded_file is not None:
 
             # collector = FeedbackCollector(email='smnitrkl50@gmail.com', password='Ram@2107', project="default")
             # from trubrics import Trubrics
-
+            
 
             st.session_state.messages.append(message)
+
+            if "response" not in st.session_state:
+                st.session_state.response = ""
+            if "response1" not in st.session_state:
+                st.session_state.response1 = ""
+            if "response2" not in st.session_state:
+                st.session_state.response2 = ""
+            if "response3" not in st.session_state:
+                st.session_state.response3 = ""
+            if "feedback_key" not in st.session_state:
+                st.session_state.feedback_key = 0
+            if "logged_prompt" not in st.session_state:
+                st.session_state.logged_prompt = ""
             collector = FeedbackCollector(
                 project="llm_gen",
                 email='smnitrkl50@gmail.com',
                 password='Ram@2107',
             )
-            
-            collector.st_feedback(
-                component="default1",
-                feedback_type="faces",
-                model="llama2_13b",
-                prompt_id=None,  # see prompts to log prompts and model generations
-                open_feedback_label='Provide Feedback'
-            )
-        
+            if st.session_state.response1:
+                st.markdown(f"#### :violet[{st.session_state.response1}]")
+                collector.st_feedback(
+                    component="default1",
+                    feedback_type="faces",
+                    model="llama2_13b",
+                    prompt_id=None,  # see prompts to log prompts and model generations
+                    open_feedback_label='Provide Feedback'
+                )
+            elif st.session_state.response2:
+                st.markdown(f"#### :violet[{st.session_state.response3}]")
+                collector.st_feedback(
+                    component="default1",
+                    feedback_type="faces",
+                    model="llama2_13b",
+                    prompt_id=None,  # see prompts to log prompts and model generations
+                    open_feedback_label='Provide Feedback'
+                )
+            elif st.session_state.response3:
+                st.markdown(f"#### :violet[{st.session_state.response3}]")
+                collector.st_feedback(
+                    component="default1",
+                    feedback_type="faces",
+                    model="llama2_13b",
+                    prompt_id=None,  # see prompts to log prompts and model generations
+                    open_feedback_label='Provide Feedback'
+                )
             # if user_feedback:
             #     st.write("#### Raw feedback saved to Trubrics:")
             #     st.write(user_feedback)
