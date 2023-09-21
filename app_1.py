@@ -447,6 +447,20 @@ if uploaded_file is not None:
                 email='smnitrkl50@gmail.com',
                 password='Ram@2107',
             )
+
+            # button = st.button(f"Ask {model}")
+
+            # if button:
+            #     response = openai.ChatCompletion.create(model=model, messages=[{"role": "user", "content": prompt}])
+            #     response_text = response.choices[0].message["content"]
+            #     st.session_state.logged_prompt = collector.log_prompt(
+            #         config_model={"model": model}, prompt=prompt, generation=response_text, tags=["llm_app.py"], user_id=email
+            #     )
+            #     st.session_state.response = response_text
+            #     st.session_state.feedback_key += 1
+            st.session_state.response1 = response1
+            st.session_state.response2 = response2
+            st.session_state.response3 = response3
             if st.session_state.response1:
                 st.markdown(f"#### :violet[{st.session_state.response1}]")
                 collector.st_feedback(
@@ -456,6 +470,7 @@ if uploaded_file is not None:
                     prompt_id=None,  # see prompts to log prompts and model generations
                     open_feedback_label='Provide Feedback'
                 )
+            
             elif st.session_state.response2:
                 st.markdown(f"#### :violet[{st.session_state.response3}]")
                 collector.st_feedback(
