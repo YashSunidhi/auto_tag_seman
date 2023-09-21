@@ -431,21 +431,21 @@ if uploaded_file is not None:
             st.session_state.messages.append(message)
             collector = FeedbackCollector(
                 project="llm_gen",
-                email='smnitrkl50@gmail.com',
-                password='Ram@2107',
+                email=st.secrets.TRUBRICS_EMAIL,
+                password=st.secrets.TRUBRICS_PASSWORD,
             )
-
-            user_feedback = collector.st_feedback(
-                component="default",
-                model="llama2_13b",
+            
+            collector.st_feedback(
+                component="default1",
                 feedback_type="faces",
-                open_feedback_label="[Optional] Provide additional feedback",
+                model="gpt-3.5-turbo",
                 prompt_id=prompt,  # see prompts to log prompts and model generations
+                open_feedback_label='Provide Feedback'
             )
         
-            if user_feedback:
-                st.write("#### Raw feedback saved to Trubrics:")
-                st.write(user_feedback)
+            # if user_feedback:
+            #     st.write("#### Raw feedback saved to Trubrics:")
+            #     st.write(user_feedback)
        
         # input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
         
