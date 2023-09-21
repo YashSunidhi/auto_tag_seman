@@ -15,3 +15,4 @@ sentence_transformers
 pypdf
 auto_gptq
 replicate
+trubrics[streamlit]==1.6.0
