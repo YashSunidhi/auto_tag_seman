@@ -431,14 +431,14 @@ if uploaded_file is not None:
             st.session_state.messages.append(message)
             collector = FeedbackCollector(
                 project="llm_gen",
-                email=st.secrets.TRUBRICS_EMAIL,
-                password=st.secrets.TRUBRICS_PASSWORD,
+                email='smnitrkl50@gmail.com',
+                password='Ram@2107',
             )
             
             collector.st_feedback(
                 component="default1",
                 feedback_type="faces",
-                model="gpt-3.5-turbo",
+                model="llama2_13b",
                 prompt_id=prompt,  # see prompts to log prompts and model generations
                 open_feedback_label='Provide Feedback'
             )
