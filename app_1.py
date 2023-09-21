@@ -439,7 +439,7 @@ if uploaded_file is not None:
                 component="default1",
                 feedback_type="faces",
                 model="llama2_13b",
-                prompt_id=prompt,  # see prompts to log prompts and model generations
+                prompt_id=None,  # see prompts to log prompts and model generations
                 open_feedback_label='Provide Feedback'
             )
         
