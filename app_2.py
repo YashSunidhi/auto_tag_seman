@@ -77,7 +77,7 @@ def cont_gen_module():
   
       #st.markdown('I make content on AI on regular basis do check my Youtube channel [link](https://www.youtube.com/@muhammadmoinfaisal/videos)')
 
-  os.environ['REPLICATE_API_TOKEN']=add_replicate_api
+  #os.environ['REPLICATE_API_TOKEN']=add_replicate_api
   #Store the LLM Generated Reponese
   
   if "messages" not in st.session_state.keys():
