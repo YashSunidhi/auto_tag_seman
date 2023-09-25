@@ -187,7 +187,7 @@ def cont_gen_module():
                   placeholder.markdown(full_response)
               placeholder.markdown(full_response)
   
-      message= {"role":"assistant", "content":full_response)
+      message= {"role":"assistant", "content":full_response}
 
 
 
