@@ -228,7 +228,7 @@ def page6():
       # )
       
 
-      st.session_state.messages.append(message)
+      #st.session_state.messages.append(message)
 
       
       
