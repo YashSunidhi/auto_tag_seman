@@ -149,50 +149,56 @@ def page6():
           with st.spinner("Thinking..."):
               tab1, tab2, tab3 = st.tabs(["Generated Outcome 1","Generated Outcome 2","Generated Outcome 3"])
               with tab1:
-                  response1= tab1.write(dx['generation_1'][0])
+                if "feedback_key" not in st.session_state:
+                  st.session_state.feedback_key = 0
+                response1= tab1.write(dx['generation_1'][0])
                   collector = FeedbackCollector(
                   project="llm_gen",
                   email='smnitrkl50@gmail.com',
                   password='Ram@2107',
-                  )
+                )
         
-                  collector.st_feedback(
+                collector.st_feedback(
                   component="default1",
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
                   open_feedback_label='Provide Feedback'
-                  )
+                )
               with tab2:
-                  response2=tab2.write(dx['generation_2'][0])
-                  collector = FeedbackCollector(
+                if "feedback_key" not in st.session_state:
+                  st.session_state.feedback_key = 0
+                response2=tab2.write(dx['generation_2'][0])
+                collector = FeedbackCollector(
                   project="llm_gen",
                   email='smnitrkl50@gmail.com',
                   password='Ram@2107',
-                  )
+                )
         
-                  collector.st_feedback(
+                collector.st_feedback(
                   component="default1",
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
                   open_feedback_label='Provide Feedback'
-                  )
+                )
               with tab3:
-                  response3= tab3.write(dx['generation_3'][0])
+                if "feedback_key" not in st.session_state:
+                  st.session_state.feedback_key = 0
+                response3= tab3.write(dx['generation_3'][0])
                   collector = FeedbackCollector(
                   project="llm_gen",
                   email='smnitrkl50@gmail.com',
                   password='Ram@2107',
-                  )
+                )
         
-                  collector.st_feedback(
+                collector.st_feedback(
                   component="default1",
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
                   open_feedback_label='Provide Feedback'
-                  )
+                )
               #response=generate_llama2_response(prompt)
               placeholder=st.empty()
               full_response=''
@@ -206,22 +212,22 @@ def page6():
   
       message= {"role":"assistant", "content":full_response}
 
-      collector = FeedbackCollector(
-          project="llm_gen",
-          email='smnitrkl50@gmail.com',
-          password='Ram@2107',
-      )
+      # collector = FeedbackCollector(
+      #     project="llm_gen",
+      #     email='smnitrkl50@gmail.com',
+      #     password='Ram@2107',
+      # )
 
-      collector.st_feedback(
-          component="default1",
-          feedback_type="faces",
-          model="llama2_13b",
-          prompt_id=None,  # see prompts to log prompts and model generations
-          open_feedback_label='Provide Feedback'
-      )
+      # collector.st_feedback(
+      #     component="default1",
+      #     feedback_type="faces",
+      #     model="llama2_13b",
+      #     prompt_id=None,  # see prompts to log prompts and model generations
+      #     open_feedback_label='Provide Feedback'
+      # )
       
 
-      #st.session_state.messages.append(message)
+      st.session_state.messages.append(message)
 
       
       
