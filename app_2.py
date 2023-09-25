@@ -186,7 +186,7 @@ def page6():
                 if "feedback_key" not in st.session_state:
                   st.session_state.feedback_key = 0
                 response3= tab3.write(dx['generation_3'][0])
-                  collector = FeedbackCollector(
+                collector = FeedbackCollector(
                   project="llm_gen",
                   email='smnitrkl50@gmail.com',
                   password='Ram@2107',
