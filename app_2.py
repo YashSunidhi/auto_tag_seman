@@ -26,60 +26,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from trubrics.integrations.streamlit import FeedbackCollector
 from trubrics import Trubrics
 
-# from torch import cuda, bfloat16
-# import transformers
-# import torch
-# from transformers import StoppingCriteria, StoppingCriteriaList
-# from langchain.llms import HuggingFacePipeline
-# from langchain.document_loaders import PyPDFDirectoryLoader
-# from langchain.embeddings import HuggingFaceEmbeddings
-# from langchain.vectorstores import FAISS
-# from langchain.chains import ConversationalRetrievalChain
-
-# import os 
-# from langchain.chains import RetrievalQA
-# from langchain.llms import OpenAI
-# from langchain.document_loaders import TextLoader
-# from langchain.document_loaders import PyPDFLoader
-# from langchain.indexes import VectorstoreIndexCreator
-# from langchain.text_splitter import CharacterTextSplitter
-# from langchain.embeddings import OpenAIEmbeddings
-# from langchain.vectorstores import Chroma
-# import tempfile
-# import numpy as np
-# import torch
-# import os
-# import pandas as pd
-# from sentence_transformers import SentenceTransformer
-# import faiss
-# import time
-# import json
-# from sentence_transformers import SentenceTransformer, CrossEncoder, util
-# import gzip
-# import os
-# import torch
-# from rank_bm25 import BM25Okapi
-# from sklearn.feature_extraction import _stop_words
-# import string
-# from tqdm.autonotebook import tqdm
-# import numpy as np
-
-# import streamlit as st
-from helpers import (
-    upload_pdf_file, 
-    create_space, 
-    image_extraction_component, 
-    get_pdf_from_link, 
-    return_pdf_data, 
-    text_summary_component,
-    set_session_state_key,
-    sidebar_widget,
-    get_text_data_from_pdf,
-    load_state,
-    load_pdf_report_summary
-)
-
-from config import PDF_DATA_KEY, TEXT_DATA_KEY
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'> ContentSculpt </h1>", unsafe_allow_html=True)
@@ -204,10 +150,49 @@ def page6():
               tab1, tab2, tab3 = st.tabs(["Generated Outcome 1","Generated Outcome 2","Generated Outcome 3"])
               with tab1:
                   response1= tab1.write(dx['generation_1'][0])
+                  collector = FeedbackCollector(
+                  project="llm_gen",
+                  email='smnitrkl50@gmail.com',
+                  password='Ram@2107',
+                  )
+        
+                  collector.st_feedback(
+                  component="default1",
+                  feedback_type="faces",
+                  model="llama2_13b",
+                  prompt_id=None,  # see prompts to log prompts and model generations
+                  open_feedback_label='Provide Feedback'
+                  )
               with tab2:
                   response2=tab2.write(dx['generation_2'][0])
+                  collector = FeedbackCollector(
+                  project="llm_gen",
+                  email='smnitrkl50@gmail.com',
+                  password='Ram@2107',
+                  )
+        
+                  collector.st_feedback(
+                  component="default1",
+                  feedback_type="faces",
+                  model="llama2_13b",
+                  prompt_id=None,  # see prompts to log prompts and model generations
+                  open_feedback_label='Provide Feedback'
+                  )
               with tab3:
                   response3= tab3.write(dx['generation_3'][0])
+                  collector = FeedbackCollector(
+                  project="llm_gen",
+                  email='smnitrkl50@gmail.com',
+                  password='Ram@2107',
+                  )
+        
+                  collector.st_feedback(
+                  component="default1",
+                  feedback_type="faces",
+                  model="llama2_13b",
+                  prompt_id=None,  # see prompts to log prompts and model generations
+                  open_feedback_label='Provide Feedback'
+                  )
               #response=generate_llama2_response(prompt)
               placeholder=st.empty()
               full_response=''
@@ -236,7 +221,7 @@ def page6():
       )
       
 
-      st.session_state.messages.append(message)
+      #st.session_state.messages.append(message)
 
       
       
