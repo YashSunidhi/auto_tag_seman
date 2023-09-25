@@ -1,28 +1,4 @@
 import streamlit as st
-import time
-import sys, fitz
-import pdfplumber
-import base64
-from pathlib import Path
-from PIL import Image
-import re
-import replicate
-import pandas as pd
-import ast
-import gzip
-import os
-from torch import cuda, bfloat16
-import transformers
-import torch
-from transformers import StoppingCriteria, StoppingCriteriaList
-from langchain.llms import HuggingFacePipeline
-from langchain.document_loaders import PyPDFDirectoryLoader
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-from transformers import AutoTokenizer, pipeline, logging
-from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from trubrics.integrations.streamlit import FeedbackCollector
 from trubrics import Trubrics
 
@@ -33,7 +9,7 @@ st.markdown("<h6 style='text-align: center; color: black;'> Intelligent Content 
 #uploaded_file = st.sidebar.file_uploader("Upload a PDF File",type= 'pdf' , key="file")
 #if uploaded_file is not None:
 
-def page6():
+def cont_gen_module():
   st.markdown("<h3 style='text-align: center; color: grey;'> Instruction Based Promotional Content Generation </h3>", unsafe_allow_html=True)
   #######
   # Get the input text from the user
@@ -211,94 +187,15 @@ def page6():
                   placeholder.markdown(full_response)
               placeholder.markdown(full_response)
   
-      message= {"role":"assistant", "content":full_response}
-
-      # collector = FeedbackCollector(
-      #     project="llm_gen",
-      #     email='smnitrkl50@gmail.com',
-      #     password='Ram@2107',
-      # )
-
-      # collector.st_feedback(
-      #     component="default1",
-      #     feedback_type="faces",
-      #     model="llama2_13b",
-      #     prompt_id=None,  # see prompts to log prompts and model generations
-      #     open_feedback_label='Provide Feedback'
-      # )
-      
-
-      #st.session_state.messages.append(message)
-
-      
-      
-      # if user_feedback:
-      #     st.write("#### Raw feedback saved to Trubrics:")
-      #     st.write(user_feedback)
- 
-  # input_text = st.text_input("Write an executive short email for internal purposes based on document summary? ")
-  
-  # dg_g = pd.read_csv(os.path.join(os.getcwd(),'Demo_lab_1 - Demo_lab.csv'))
-  # if uploaded_file.name == 'Residual Disease Management In HER2+ve Early Breast Cancer Setting - Case Discussion.pdf':
-  #     output_text = st.write(dg_g['Email Based on Summary'][0])
-      
-  # elif uploaded_file.name == 'test_breast_file.pdf':
-  #     output_text = st.write(dg_g['Email Based on Summary'][1])
-     
-  # elif uploaded_file.name == 'APAC DAN Lung PPoC Insight WP (last updated 2023.08.08).pdf':
-  #     output_text = st.write(dg_g['Email Based on Summary'][2])
-      
-  # begin initializing HF items, you need an access token
-  # import requests
-
-  # API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-13b-chat-hf"
-  # headers = {"Authorization": "Bearer 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"}
-
-  # def query(payload):
-  #     response = requests.post(API_URL, headers=headers, json=payload)
-  #     return response.json()
-      
-  # output = query({
-  #     "inputs": "Can you please let us know more details about your ",
-  # })
-
-  # # Get the input text from the user
-  # st.title("Marketing Compaign Generator")
-  # input_text = st.text_input("Enter the prompt/instruction for the newsletter:")
-  # prompt = input_text #"Generate a newsletter that captures the logical dependencies present in the provided context. Identify and highlight the relationships, cause-and-effect connections, and sequential progressions among different pieces of information. Ensure that the generated newsletter effectively communicates the flow of events, insights, or concepts by showcasing their interconnectedness and logical coherence if any from text with formal word included "  + str('""" ') + str(text) + str(' """')
-
-  # prompt_template = f'''
-
-  # USER: {prompt}
-
-  # ASSISTANT: Write an impressive newsletter with Retrospectives and Prospectives finds for mentioned product. Please say Not Applicable if you are not confident or honest about outcome:
-  # '''
-  
-  # output_text= query({
-  #     "inputs": prompt_template,
-  # })
-
-  # Get the input text from the user
-  # st.title("Generated Outcome")
-  # st.write(output_text)
-  
-  # st.title("Visuals Generation for Marketing Compaign")
-
-  # # Get the input text from the user
-  # input_text = st.text_input("Enter the prompt/instruction for the Visuals:" )
+      message= {"role":"assistant", "content":full_response)
 
 
 
 
 
 page_names_to_funcs = {
-  #"Intelligent Data Parsing": main_page,
-  #"Contextual Tags (Based on Hypothesis)": page3,
-  #"Full Document Summary (Image and Text)": page5,
-  "Content Generation" : page6,
-  #"Non - Contextual Tags, Iterate over pages": page2,
-  #"Search across Document": page4,
-  #"Query Based Evidence Generation": page8,
+  "Content Generation" : cont_gen_module,
+
 }
 
 selected_page = st.sidebar.selectbox("# Analysis Selection", page_names_to_funcs.keys())
