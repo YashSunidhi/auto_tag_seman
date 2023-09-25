@@ -163,7 +163,8 @@ def page6():
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
-                  open_feedback_label='Provide Feedback'
+                  open_feedback_label='Provide Feedback',
+                  key='response1'
                 )
               with tab2:
                 if "feedback_key" not in st.session_state:
@@ -180,7 +181,7 @@ def page6():
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
-                  open_feedback_label='Provide Feedback'
+                  open_feedback_label='Provide Feedback',key='response2'
                 )
               with tab3:
                 if "feedback_key" not in st.session_state:
@@ -197,7 +198,7 @@ def page6():
                   feedback_type="faces",
                   model="llama2_13b",
                   prompt_id=None,  # see prompts to log prompts and model generations
-                  open_feedback_label='Provide Feedback'
+                  open_feedback_label='Provide Feedback',key='response3'
                 )
               #response=generate_llama2_response(prompt)
               placeholder=st.empty()
