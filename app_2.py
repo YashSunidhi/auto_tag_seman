@@ -1,6 +1,7 @@
 import streamlit as st
 from trubrics.integrations.streamlit import FeedbackCollector
 from trubrics import Trubrics
+import replicate
 
 
 st.set_page_config(layout="wide")
